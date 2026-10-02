@@ -1,0 +1,2306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sonda — Decision playground</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M27 7H17C7 7 7 18 17 18h2c10 0 10 11 0 11H9' stroke='%23304bdf' stroke-width='6' fill='none'/%3E%3Ccircle cx='28' cy='28' r='3' fill='%23304bdf'/%3E%3C/svg%3E">
+<style>
+
+:root {
+  color-scheme: light;
+  --bg:#f5f5f0; --panel:#fff; --ink:#20231f; --muted:#6a6e64; --line:#dfe1d7;
+  --accent:#304bdf; --accent-ink:#fff; --accent-soft:#eef0ff; --good:#367044; --good-soft:#edf6e9;
+  --bad:#be4236; --bad-soft:#fff0ec; --warn:#987114; --bar:#b8c3fb; --code:#f6f7f3;
+  --space-visible:0; --lime:#d9f283; --hero:#e9eddf; --shadow:0 4px 20px #20231f04;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme:dark;
+    --bg:#161a17; --panel:#202520; --ink:#f0f1e9; --muted:#a5afa1; --line:#394137;
+    --accent:#9bacff; --accent-ink:#182248; --accent-soft:#2b3351; --good:#b2d794; --good-soft:#2b3c28;
+    --bad:#ffa69c; --bad-soft:#492e2a; --warn:#e5c675; --bar:#5263a0; --code:#191e1a;
+    --space-visible:1; --lime:#d9f283; --hero:#2a3325; --shadow:none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme:dark;
+  --bg:#161a17; --panel:#202520; --ink:#f0f1e9; --muted:#a5afa1; --line:#394137;
+  --accent:#9bacff; --accent-ink:#182248; --accent-soft:#2b3351; --good:#b2d794; --good-soft:#2b3c28;
+  --bad:#ffa69c; --bad-soft:#492e2a; --warn:#e5c675; --bar:#5263a0; --code:#191e1a;
+  --space-visible:1; --lime:#d9f283; --hero:#2a3325; --shadow:none;
+}
+* { box-sizing:border-box; }
+body { margin:0; isolation:isolate; background:var(--bg); color:var(--ink); font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased; }
+/* Fixed decorative sky: CSS follows both the saved theme and the system theme.
+   It stays behind content and never intercepts pointer or keyboard input. */
+body::before,body::after { content:""; position:fixed; inset:0; pointer-events:none; opacity:var(--space-visible); }
+body::before { z-index:-2; background:radial-gradient(ellipse at 6% 22%,#25367345,transparent 42%),radial-gradient(ellipse at 96% 66%,#36437638,transparent 40%),radial-gradient(ellipse at 48% 115%,#294c4133,transparent 48%),#080e19; }
+body::after { z-index:-1; background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221440%22%20height%3D%221000%22%20viewBox%3D%220%200%201440%201000%22%3E%3Ccircle%20cx%3D%22233.9%22%20cy%3D%22143.7%22%20r%3D%221.15%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.41%22%2F%3E%3Ccircle%20cx%3D%22509.6%22%20cy%3D%2296.1%22%20r%3D%221.15%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.36%22%2F%3E%3Ccircle%20cx%3D%22876.1%22%20cy%3D%22861.8%22%20r%3D%221.15%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.26%22%2F%3E%3Ccircle%20cx%3D%221261.7%22%20cy%3D%22450.2%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.46%22%2F%3E%3Ccircle%20cx%3D%22737.6%22%20cy%3D%22116.7%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.59%22%2F%3E%3Ccircle%20cx%3D%221100.2%22%20cy%3D%22338.2%22%20r%3D%221.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%221100.2%22%20cy%3D%22338.2%22%20r%3D%224%22%20fill%3D%22%23dce5ff%22%20opacity%3D%22.08%22%2F%3E%3Ccircle%20cx%3D%22208.5%22%20cy%3D%22454.4%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.44%22%2F%3E%3Ccircle%20cx%3D%221111.2%22%20cy%3D%22491.1%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.32%22%2F%3E%3Ccircle%20cx%3D%221252.4%22%20cy%3D%22197.0%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.44%22%2F%3E%3Ccircle%20cx%3D%221429.2%22%20cy%3D%22661.8%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%2270.2%22%20cy%3D%22573.1%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.34%22%2F%3E%3Ccircle%20cx%3D%22487.7%22%20cy%3D%22638.3%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.43%22%2F%3E%3Ccircle%20cx%3D%221019.9%22%20cy%3D%22889.9%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.28%22%2F%3E%3Ccircle%20cx%3D%22914.0%22%20cy%3D%2285.7%22%20r%3D%221.15%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.54%22%2F%3E%3Ccircle%20cx%3D%22185.8%22%20cy%3D%2260.9%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%22716.9%22%20cy%3D%22406.7%22%20r%3D%221.15%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.44%22%2F%3E%3Ccircle%20cx%3D%22427.4%22%20cy%3D%22390.2%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.47%22%2F%3E%3Ccircle%20cx%3D%221148.4%22%20cy%3D%22393.3%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.54%22%2F%3E%3Ccircle%20cx%3D%22587.9%22%20cy%3D%22346.1%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.46%22%2F%3E%3Ccircle%20cx%3D%22245.7%22%20cy%3D%22503.0%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%22323.8%22%20cy%3D%22565.2%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%22590.0%22%20cy%3D%22810.6%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.25%22%2F%3E%3Ccircle%20cx%3D%22614.2%22%20cy%3D%22945.3%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.56%22%2F%3E%3Ccircle%20cx%3D%22655.3%22%20cy%3D%22112.4%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.60%22%2F%3E%3Ccircle%20cx%3D%22403.9%22%20cy%3D%22985.1%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.42%22%2F%3E%3Ccircle%20cx%3D%22464.8%22%20cy%3D%22733.6%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.40%22%2F%3E%3Ccircle%20cx%3D%221338.1%22%20cy%3D%22379.3%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.28%22%2F%3E%3Ccircle%20cx%3D%22241.5%22%20cy%3D%22350.4%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.38%22%2F%3E%3Ccircle%20cx%3D%22852.6%22%20cy%3D%22401.7%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%22912.0%22%20cy%3D%22690.1%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.42%22%2F%3E%3Ccircle%20cx%3D%221303.4%22%20cy%3D%22505.2%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.57%22%2F%3E%3Ccircle%20cx%3D%2243.3%22%20cy%3D%22908.9%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.63%22%2F%3E%3Ccircle%20cx%3D%22663.1%22%20cy%3D%22697.5%22%20r%3D%221.15%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.34%22%2F%3E%3Ccircle%20cx%3D%221056.3%22%20cy%3D%22562.2%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%22393.5%22%20cy%3D%22527.8%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.44%22%2F%3E%3Ccircle%20cx%3D%22770.7%22%20cy%3D%22779.8%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.26%22%2F%3E%3Ccircle%20cx%3D%22517.9%22%20cy%3D%22669.1%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%22660.5%22%20cy%3D%22427.4%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.32%22%2F%3E%3Ccircle%20cx%3D%2226.1%22%20cy%3D%22906.4%22%20r%3D%221.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2226.1%22%20cy%3D%22906.4%22%20r%3D%224%22%20fill%3D%22%23b6caff%22%20opacity%3D%22.08%22%2F%3E%3Ccircle%20cx%3D%221240.6%22%20cy%3D%22964.5%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.58%22%2F%3E%3Ccircle%20cx%3D%2210.7%22%20cy%3D%22524.5%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.39%22%2F%3E%3Ccircle%20cx%3D%2262.3%22%20cy%3D%22984.9%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.41%22%2F%3E%3Ccircle%20cx%3D%221433.8%22%20cy%3D%22741.0%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.48%22%2F%3E%3Ccircle%20cx%3D%22386.0%22%20cy%3D%22831.5%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.40%22%2F%3E%3Ccircle%20cx%3D%22478.7%22%20cy%3D%22815.8%22%20r%3D%221.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.26%22%2F%3E%3Ccircle%20cx%3D%22478.7%22%20cy%3D%22815.8%22%20r%3D%224%22%20fill%3D%22%23d9f283%22%20opacity%3D%22.08%22%2F%3E%3Ccircle%20cx%3D%22493.6%22%20cy%3D%22821.3%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.44%22%2F%3E%3Ccircle%20cx%3D%221152.6%22%20cy%3D%22299.7%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.28%22%2F%3E%3Ccircle%20cx%3D%221221.7%22%20cy%3D%2221.1%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%221202.4%22%20cy%3D%22266.5%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.26%22%2F%3E%3Ccircle%20cx%3D%221038.3%22%20cy%3D%22458.4%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.41%22%2F%3E%3Ccircle%20cx%3D%22884.0%22%20cy%3D%22288.6%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.60%22%2F%3E%3Ccircle%20cx%3D%2288.7%22%20cy%3D%22503.1%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.40%22%2F%3E%3Ccircle%20cx%3D%223.1%22%20cy%3D%22711.1%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.31%22%2F%3E%3Ccircle%20cx%3D%22369.7%22%20cy%3D%2214.2%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.33%22%2F%3E%3Ccircle%20cx%3D%22633.8%22%20cy%3D%22567.9%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.46%22%2F%3E%3Ccircle%20cx%3D%22917.7%22%20cy%3D%22514.0%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.46%22%2F%3E%3Ccircle%20cx%3D%22483.3%22%20cy%3D%22893.3%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.63%22%2F%3E%3Ccircle%20cx%3D%2238.4%22%20cy%3D%22707.9%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.34%22%2F%3E%3Ccircle%20cx%3D%22748.0%22%20cy%3D%2219.9%22%20r%3D%221.15%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.34%22%2F%3E%3Ccircle%20cx%3D%22527.1%22%20cy%3D%22541.1%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.64%22%2F%3E%3Ccircle%20cx%3D%22684.7%22%20cy%3D%2262.9%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%22107.2%22%20cy%3D%22648.5%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.46%22%2F%3E%3Ccircle%20cx%3D%228.9%22%20cy%3D%22701.7%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.65%22%2F%3E%3Ccircle%20cx%3D%22102.6%22%20cy%3D%22160.2%22%20r%3D%221.15%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.31%22%2F%3E%3Ccircle%20cx%3D%221190.4%22%20cy%3D%22720.2%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.48%22%2F%3E%3Ccircle%20cx%3D%221417.9%22%20cy%3D%22627.1%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.48%22%2F%3E%3Ccircle%20cx%3D%2275.3%22%20cy%3D%22444.0%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.31%22%2F%3E%3Ccircle%20cx%3D%22947.8%22%20cy%3D%22901.8%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.50%22%2F%3E%3Ccircle%20cx%3D%22221.0%22%20cy%3D%22168.6%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.40%22%2F%3E%3Ccircle%20cx%3D%221203.0%22%20cy%3D%22566.4%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2264.8%22%20cy%3D%22506.1%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.27%22%2F%3E%3Ccircle%20cx%3D%221030.3%22%20cy%3D%22693.5%22%20r%3D%221.15%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.40%22%2F%3E%3Ccircle%20cx%3D%22288.2%22%20cy%3D%22779.0%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%2296.5%22%20cy%3D%22909.5%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.38%22%2F%3E%3Ccircle%20cx%3D%22567.6%22%20cy%3D%22561.1%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%22895.6%22%20cy%3D%22398.1%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.64%22%2F%3E%3Ccircle%20cx%3D%22509.6%22%20cy%3D%22790.1%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.41%22%2F%3E%3Ccircle%20cx%3D%22131.8%22%20cy%3D%2244.6%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.50%22%2F%3E%3Ccircle%20cx%3D%22600.2%22%20cy%3D%22364.4%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.60%22%2F%3E%3Ccircle%20cx%3D%22867.1%22%20cy%3D%22974.6%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.42%22%2F%3E%3Ccircle%20cx%3D%22552.1%22%20cy%3D%22356.0%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.59%22%2F%3E%3Ccircle%20cx%3D%22825.1%22%20cy%3D%22528.2%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.56%22%2F%3E%3Ccircle%20cx%3D%22678.7%22%20cy%3D%22906.6%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%2260.9%22%20cy%3D%22322.0%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.48%22%2F%3E%3Ccircle%20cx%3D%221158.3%22%20cy%3D%2292.2%22%20r%3D%221.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.63%22%2F%3E%3Ccircle%20cx%3D%221158.3%22%20cy%3D%2292.2%22%20r%3D%224%22%20fill%3D%22%23b6caff%22%20opacity%3D%22.08%22%2F%3E%3Ccircle%20cx%3D%22723.3%22%20cy%3D%22926.7%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.64%22%2F%3E%3Ccircle%20cx%3D%22871.0%22%20cy%3D%22698.6%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.64%22%2F%3E%3Ccircle%20cx%3D%22100.9%22%20cy%3D%22128.6%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.42%22%2F%3E%3Ccircle%20cx%3D%22732.2%22%20cy%3D%22320.5%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.51%22%2F%3E%3Ccircle%20cx%3D%22325.9%22%20cy%3D%22161.1%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.27%22%2F%3E%3Ccircle%20cx%3D%221387.4%22%20cy%3D%22257.9%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.64%22%2F%3E%3Ccircle%20cx%3D%22935.2%22%20cy%3D%22670.8%22%20r%3D%221.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%22935.2%22%20cy%3D%22670.8%22%20r%3D%224%22%20fill%3D%22%23d9f283%22%20opacity%3D%22.08%22%2F%3E%3Ccircle%20cx%3D%22370.3%22%20cy%3D%22652.3%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.41%22%2F%3E%3Ccircle%20cx%3D%22776.4%22%20cy%3D%22764.1%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.32%22%2F%3E%3Ccircle%20cx%3D%22481.4%22%20cy%3D%22309.7%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.26%22%2F%3E%3Ccircle%20cx%3D%22664.5%22%20cy%3D%22798.8%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%22446.2%22%20cy%3D%22109.2%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.42%22%2F%3E%3Ccircle%20cx%3D%22912.2%22%20cy%3D%22474.4%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.61%22%2F%3E%3Ccircle%20cx%3D%221351.3%22%20cy%3D%22356.7%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%22253.8%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.37%22%2F%3E%3Ccircle%20cx%3D%22457.5%22%20cy%3D%22113.6%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.51%22%2F%3E%3Ccircle%20cx%3D%22141.5%22%20cy%3D%22213.5%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.59%22%2F%3E%3Ccircle%20cx%3D%22471.2%22%20cy%3D%22977.5%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.26%22%2F%3E%3Ccircle%20cx%3D%22313.1%22%20cy%3D%22241.4%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.27%22%2F%3E%3Ccircle%20cx%3D%221035.0%22%20cy%3D%22658.2%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.64%22%2F%3E%3Ccircle%20cx%3D%221175.2%22%20cy%3D%22506.8%22%20r%3D%221.15%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.36%22%2F%3E%3Ccircle%20cx%3D%22874.5%22%20cy%3D%22270.8%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%221021.3%22%20cy%3D%22985.9%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%221368.6%22%20cy%3D%22825.5%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.58%22%2F%3E%3Ccircle%20cx%3D%22342.4%22%20cy%3D%22475.6%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.27%22%2F%3E%3Ccircle%20cx%3D%22408.7%22%20cy%3D%22216.3%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.60%22%2F%3E%3Ccircle%20cx%3D%22212.4%22%20cy%3D%22735.7%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.31%22%2F%3E%3Ccircle%20cx%3D%2270.2%22%20cy%3D%22166.8%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.51%22%2F%3E%3Ccircle%20cx%3D%22376.7%22%20cy%3D%22962.0%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.46%22%2F%3E%3Ccircle%20cx%3D%221223.8%22%20cy%3D%22297.1%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.58%22%2F%3E%3Ccircle%20cx%3D%22925.9%22%20cy%3D%22849.4%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.40%22%2F%3E%3Ccircle%20cx%3D%22843.7%22%20cy%3D%22123.0%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.59%22%2F%3E%3Ccircle%20cx%3D%22880.7%22%20cy%3D%2293.7%22%20r%3D%221.15%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.32%22%2F%3E%3Ccircle%20cx%3D%22530.0%22%20cy%3D%22438.0%22%20r%3D%221.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.60%22%2F%3E%3Ccircle%20cx%3D%22530.0%22%20cy%3D%22438.0%22%20r%3D%224%22%20fill%3D%22%23dce5ff%22%20opacity%3D%22.08%22%2F%3E%3Ccircle%20cx%3D%22468.7%22%20cy%3D%22382.3%22%20r%3D%221.15%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.52%22%2F%3E%3Ccircle%20cx%3D%221074.6%22%20cy%3D%2271.7%22%20r%3D%221.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.29%22%2F%3E%3Ccircle%20cx%3D%221074.6%22%20cy%3D%2271.7%22%20r%3D%224%22%20fill%3D%22%23dce5ff%22%20opacity%3D%22.08%22%2F%3E%3Ccircle%20cx%3D%22327.0%22%20cy%3D%22304.4%22%20r%3D%221.15%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.45%22%2F%3E%3Ccircle%20cx%3D%22702.4%22%20cy%3D%22110.3%22%20r%3D%221.15%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.60%22%2F%3E%3Ccircle%20cx%3D%22711.3%22%20cy%3D%22565.3%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.47%22%2F%3E%3Ccircle%20cx%3D%22575.1%22%20cy%3D%22534.3%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%2266.0%22%20cy%3D%22474.9%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%22382.9%22%20cy%3D%22430.3%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.29%22%2F%3E%3Ccircle%20cx%3D%221408.6%22%20cy%3D%22195.3%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.31%22%2F%3E%3Ccircle%20cx%3D%22771.6%22%20cy%3D%22994.1%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.40%22%2F%3E%3Ccircle%20cx%3D%22101.5%22%20cy%3D%22555.3%22%20r%3D%221.15%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.63%22%2F%3E%3Ccircle%20cx%3D%22110.4%22%20cy%3D%22414.6%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.34%22%2F%3E%3Ccircle%20cx%3D%22513.9%22%20cy%3D%2254.3%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.47%22%2F%3E%3Ccircle%20cx%3D%22248.9%22%20cy%3D%22561.7%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%22973.1%22%20cy%3D%22636.8%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.29%22%2F%3E%3Ccircle%20cx%3D%22960.2%22%20cy%3D%22308.0%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.63%22%2F%3E%3Ccircle%20cx%3D%2243.0%22%20cy%3D%22311.0%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%22906.2%22%20cy%3D%22996.4%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%221248.9%22%20cy%3D%22314.8%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%221324.1%22%20cy%3D%22696.5%22%20r%3D%221.15%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.34%22%2F%3E%3Ccircle%20cx%3D%22378.7%22%20cy%3D%22235.8%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.26%22%2F%3E%3Ccircle%20cx%3D%22319.4%22%20cy%3D%22925.0%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.39%22%2F%3E%3Ccircle%20cx%3D%221222.3%22%20cy%3D%22380.5%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.52%22%2F%3E%3Ccircle%20cx%3D%221044.9%22%20cy%3D%22761.9%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.51%22%2F%3E%3Ccircle%20cx%3D%22417.6%22%20cy%3D%22651.5%22%20r%3D%221.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.32%22%2F%3E%3Ccircle%20cx%3D%22417.6%22%20cy%3D%22651.5%22%20r%3D%224%22%20fill%3D%22%23dce5ff%22%20opacity%3D%22.08%22%2F%3E%3Ccircle%20cx%3D%22522.0%22%20cy%3D%22666.2%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.65%22%2F%3E%3Ccircle%20cx%3D%221131.4%22%20cy%3D%22419.8%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.32%22%2F%3E%3Ccircle%20cx%3D%22210.5%22%20cy%3D%22568.0%22%20r%3D%221.15%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.34%22%2F%3E%3Ccircle%20cx%3D%221218.1%22%20cy%3D%22285.0%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.60%22%2F%3E%3Ccircle%20cx%3D%22563.3%22%20cy%3D%22964.8%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.48%22%2F%3E%3Ccircle%20cx%3D%22711.3%22%20cy%3D%22543.6%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.38%22%2F%3E%3Ccircle%20cx%3D%22497.7%22%20cy%3D%22747.7%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%22411.9%22%20cy%3D%22534.0%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.46%22%2F%3E%3Ccircle%20cx%3D%22540.6%22%20cy%3D%22699.5%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.31%22%2F%3E%3Ccircle%20cx%3D%22264.0%22%20cy%3D%22430.1%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.43%22%2F%3E%3Ccircle%20cx%3D%22741.5%22%20cy%3D%22795.7%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.29%22%2F%3E%3Ccircle%20cx%3D%22199.9%22%20cy%3D%22450.4%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.28%22%2F%3E%3Ccircle%20cx%3D%221065.7%22%20cy%3D%22256.9%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.39%22%2F%3E%3Ccircle%20cx%3D%22123.2%22%20cy%3D%22203.9%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.40%22%2F%3E%3Ccircle%20cx%3D%221340.5%22%20cy%3D%22377.5%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%221329.3%22%20cy%3D%22278.7%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.43%22%2F%3E%3Ccircle%20cx%3D%22437.6%22%20cy%3D%22577.0%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.31%22%2F%3E%3Ccircle%20cx%3D%22364.3%22%20cy%3D%22907.5%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.28%22%2F%3E%3Ccircle%20cx%3D%22457.8%22%20cy%3D%22341.7%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%22282.0%22%20cy%3D%22599.0%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%22493.4%22%20cy%3D%22359.9%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%221250.5%22%20cy%3D%22964.9%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.51%22%2F%3E%3Ccircle%20cx%3D%22569.0%22%20cy%3D%22845.3%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%22563.6%22%20cy%3D%22991.7%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.47%22%2F%3E%3Ccircle%20cx%3D%2292.2%22%20cy%3D%22149.7%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.36%22%2F%3E%3Ccircle%20cx%3D%221307.7%22%20cy%3D%22684.4%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%221199.3%22%20cy%3D%22604.8%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.54%22%2F%3E%3Ccircle%20cx%3D%2277.9%22%20cy%3D%22953.8%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.33%22%2F%3E%3Ccircle%20cx%3D%22261.6%22%20cy%3D%2254.4%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.33%22%2F%3E%3Ccircle%20cx%3D%2285.2%22%20cy%3D%22790.8%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.49%22%2F%3E%3Ccircle%20cx%3D%22406.3%22%20cy%3D%22452.0%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.52%22%2F%3E%3Ccircle%20cx%3D%22218.2%22%20cy%3D%22399.8%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.61%22%2F%3E%3Ccircle%20cx%3D%221227.1%22%20cy%3D%22897.4%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.52%22%2F%3E%3Ccircle%20cx%3D%221132.8%22%20cy%3D%22972.6%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.54%22%2F%3E%3Ccircle%20cx%3D%22737.4%22%20cy%3D%22672.5%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.34%22%2F%3E%3Ccircle%20cx%3D%221143.6%22%20cy%3D%22248.2%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.42%22%2F%3E%3Ccircle%20cx%3D%221314.5%22%20cy%3D%2279.7%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.59%22%2F%3E%3Ccircle%20cx%3D%22766.6%22%20cy%3D%22359.0%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.37%22%2F%3E%3Ccircle%20cx%3D%22610.4%22%20cy%3D%22200.8%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%22165.3%22%20cy%3D%2219.6%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.43%22%2F%3E%3Ccircle%20cx%3D%221188.3%22%20cy%3D%22185.8%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%22295.9%22%20cy%3D%22481.6%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.49%22%2F%3E%3Ccircle%20cx%3D%221003.4%22%20cy%3D%22472.4%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.40%22%2F%3E%3Ccircle%20cx%3D%22571.5%22%20cy%3D%22483.6%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.46%22%2F%3E%3Ccircle%20cx%3D%221106.0%22%20cy%3D%22919.0%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.39%22%2F%3E%3Ccircle%20cx%3D%221337.2%22%20cy%3D%22706.2%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.28%22%2F%3E%3Ccircle%20cx%3D%22939.2%22%20cy%3D%22727.0%22%20r%3D%221.15%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.52%22%2F%3E%3Ccircle%20cx%3D%22788.5%22%20cy%3D%2261.8%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.27%22%2F%3E%3Ccircle%20cx%3D%221022.9%22%20cy%3D%22650.2%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.59%22%2F%3E%3Ccircle%20cx%3D%22775.2%22%20cy%3D%22624.7%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.46%22%2F%3E%3Ccircle%20cx%3D%22562.8%22%20cy%3D%2264.8%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.49%22%2F%3E%3Ccircle%20cx%3D%2267.9%22%20cy%3D%22989.8%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%22496.9%22%20cy%3D%22475.6%22%20r%3D%221.15%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.45%22%2F%3E%3Ccircle%20cx%3D%221280.7%22%20cy%3D%22235.5%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.41%22%2F%3E%3Ccircle%20cx%3D%22343.1%22%20cy%3D%22108.3%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.29%22%2F%3E%3Ccircle%20cx%3D%22120.2%22%20cy%3D%22663.1%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.39%22%2F%3E%3Ccircle%20cx%3D%22655.9%22%20cy%3D%22551.9%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.28%22%2F%3E%3Ccircle%20cx%3D%221264.1%22%20cy%3D%22730.5%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.42%22%2F%3E%3Ccircle%20cx%3D%22794.6%22%20cy%3D%22457.4%22%20r%3D%221.15%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%22768.1%22%20cy%3D%22738.3%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.27%22%2F%3E%3Ccircle%20cx%3D%221166.4%22%20cy%3D%22247.1%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.59%22%2F%3E%3Ccircle%20cx%3D%22412.1%22%20cy%3D%22440.5%22%20r%3D%221.15%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.58%22%2F%3E%3Ccircle%20cx%3D%2260.1%22%20cy%3D%22354.7%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.45%22%2F%3E%3Ccircle%20cx%3D%22673.8%22%20cy%3D%22591.1%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.33%22%2F%3E%3Ccircle%20cx%3D%221122.3%22%20cy%3D%2272.9%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.63%22%2F%3E%3Ccircle%20cx%3D%22521.0%22%20cy%3D%22442.6%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%221143.7%22%20cy%3D%22648.2%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.30%22%2F%3E%3Ccircle%20cx%3D%221014.2%22%20cy%3D%22292.6%22%20r%3D%221.15%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.37%22%2F%3E%3Ccircle%20cx%3D%221112.5%22%20cy%3D%22818.4%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%22231.4%22%20cy%3D%22485.7%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.44%22%2F%3E%3Ccircle%20cx%3D%221413.4%22%20cy%3D%22767.2%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.64%22%2F%3E%3Ccircle%20cx%3D%22628.7%22%20cy%3D%22350.8%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.37%22%2F%3E%3Ccircle%20cx%3D%22174.5%22%20cy%3D%22619.9%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%22851.2%22%20cy%3D%22854.1%22%20r%3D%220.55%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%2276.0%22%20cy%3D%22892.7%22%20r%3D%220.55%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.64%22%2F%3E%3Ccircle%20cx%3D%22514.2%22%20cy%3D%22934.7%22%20r%3D%220.8%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.44%22%2F%3E%3Ccircle%20cx%3D%22133.5%22%20cy%3D%22363.2%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%221374.6%22%20cy%3D%22308.6%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%22915.1%22%20cy%3D%22813.3%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.48%22%2F%3E%3Ccircle%20cx%3D%221415.2%22%20cy%3D%22423.0%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.31%22%2F%3E%3Ccircle%20cx%3D%22995.5%22%20cy%3D%22773.7%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.43%22%2F%3E%3Ccircle%20cx%3D%2256.1%22%20cy%3D%22326.9%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.39%22%2F%3E%3Ccircle%20cx%3D%22791.5%22%20cy%3D%22706.5%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.31%22%2F%3E%3Ccircle%20cx%3D%22625.0%22%20cy%3D%22649.0%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%22276.5%22%20cy%3D%22654.2%22%20r%3D%221.15%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.60%22%2F%3E%3Ccircle%20cx%3D%221288.0%22%20cy%3D%22364.2%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.28%22%2F%3E%3Ccircle%20cx%3D%22166.8%22%20cy%3D%22807.1%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.58%22%2F%3E%3Ccircle%20cx%3D%22646.7%22%20cy%3D%22377.2%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.38%22%2F%3E%3Ccircle%20cx%3D%221000.3%22%20cy%3D%22947.7%22%20r%3D%220.8%22%20fill%3D%22%23d9f283%22%20opacity%3D%220.52%22%2F%3E%3Ccircle%20cx%3D%221072.5%22%20cy%3D%22188.5%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.28%22%2F%3E%3Ccircle%20cx%3D%221100.6%22%20cy%3D%22502.9%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%22557.4%22%20cy%3D%22665.4%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.48%22%2F%3E%3Ccircle%20cx%3D%22152.7%22%20cy%3D%22975.7%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.51%22%2F%3E%3Ccircle%20cx%3D%22757.0%22%20cy%3D%22847.3%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.39%22%2F%3E%3Ccircle%20cx%3D%2263.1%22%20cy%3D%22718.6%22%20r%3D%220.55%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.53%22%2F%3E%3Ccircle%20cx%3D%22272.4%22%20cy%3D%22288.0%22%20r%3D%220.55%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.29%22%2F%3E%3Ccircle%20cx%3D%22747.3%22%20cy%3D%22359.0%22%20r%3D%220.8%22%20fill%3D%22%23f0f1e9%22%20opacity%3D%220.34%22%2F%3E%3Ccircle%20cx%3D%22923.8%22%20cy%3D%22647.6%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.62%22%2F%3E%3Ccircle%20cx%3D%221171.5%22%20cy%3D%22516.9%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.37%22%2F%3E%3Ccircle%20cx%3D%2252.6%22%20cy%3D%22104.8%22%20r%3D%220.8%22%20fill%3D%22%23dce5ff%22%20opacity%3D%220.42%22%2F%3E%3Ccircle%20cx%3D%22919.9%22%20cy%3D%22838.5%22%20r%3D%221.15%22%20fill%3D%22%23b6caff%22%20opacity%3D%220.28%22%2F%3E%3C%2Fsvg%3E"); background-size:1440px 1000px; background-repeat:repeat; mask-image:linear-gradient(90deg,#000 0%,#0009 25%,#0006 50%,#000b 75%,#000 100%); }
+@media print { body::before,body::after { display:none; } }
+button,input,select,textarea { font:inherit; }
+button,a,input,select,textarea,summary { -webkit-tap-highlight-color:transparent; }
+button { cursor:pointer; }
+button:disabled { cursor:wait; opacity:.55; }
+:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+::selection { background:var(--lime); color:#20231f; }
+code,pre,textarea,.mono,kbd { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:12px; }
+a { color:var(--accent); }
+.skip-link { position:fixed; top:-100px; left:20px; z-index:10; padding:12px 20px; background:var(--panel); }
+.skip-link:not(:focus) { clip-path:inset(50%); }
+.skip-link:focus { top:12px; }
+header { border-bottom:1px solid var(--line); }
+.bar-top { max-width:1480px; margin:auto; padding:19px 40px; display:flex; gap:18px; align-items:center; }
+.brand { display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-size:30px; font-weight:750; letter-spacing:-1.8px; line-height:1; }
+.brand svg { width:33px; height:33px; color:var(--accent); }
+.brand-label { border-left:1px solid var(--line); padding-left:18px; color:var(--muted); font-size:10px; letter-spacing:1.8px; text-transform:uppercase; }
+.server-status { display:flex; align-items:center; gap:8px; font-size:11px; color:var(--muted); }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--muted); display:inline-block; flex-shrink:0; }
+.dot.ok { background:var(--good); box-shadow:0 0 0 4px var(--good-soft); }
+.dot.down { background:var(--bad); }
+.model { max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; color:var(--muted); }
+.spacer { flex:1; }
+.seg { display:inline-flex; padding:3px; border:1px solid var(--line); border-radius:8px; gap:2px; }
+.seg button { border:0; border-radius:5px; background:transparent; color:var(--muted); padding:5px 9px; font:inherit; font-size:11px; font-weight:600; }
+.seg button[aria-pressed="true"] { background:var(--ink); color:var(--panel); }
+main { max-width:1480px; margin:auto; padding:0 40px 32px; }
+.hero { display:grid; grid-template-columns:1.15fr 1fr; gap:30px; align-items:center; padding:40px 0 32px; }
+.eyebrow { display:flex; align-items:center; gap:8px; font-size:10px; font-weight:600; letter-spacing:1.8px; text-transform:uppercase; }
+.eyebrow::before { content:""; width:6px; height:6px; background:var(--accent); }
+h1 { font-size:clamp(38px,4.5vw,64px); letter-spacing:-3px; font-weight:650; line-height:1.06; margin:18px 0; }
+h1 span { display:block; }
+h1 .accent { color:var(--accent); }
+.hero-copy p { color:var(--muted); max-width:440px; margin:0; font-size:14px; line-height:1.7; }
+.hero-art { background:var(--hero); border:1px solid color-mix(in srgb,var(--ink) 5%,transparent); border-radius:12px; height:224px; position:relative; overflow:hidden; isolation:isolate; }
+.hero-art::before { content:none; }
+.hero-art .decision-scene { display:block; position:absolute; width:560px; max-width:none; height:224px; top:0; left:50%; transform:translateX(-50%); }
+.art-label { text-transform:uppercase; position:absolute; z-index:1; top:18px; left:20px; font:9px ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:1.4px; color:var(--muted); }
+.art-edition { position:absolute; top:18px; right:20px; color:var(--muted); font:9px ui-monospace,monospace; letter-spacing:1px; }
+.art-caption { position:absolute; z-index:1; bottom:17px; left:20px; right:20px; display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:10px; color:var(--muted); }
+.art-caption strong { color:var(--ink); font-weight:500; }
+.art-caption > span { display:flex; gap:5px; align-items:center; }
+.art-caption i { display:block; width:3px; height:3px; border-radius:50%; background:var(--muted); }
+.art-caption i:last-child { width:18px; border-radius:2px; background:var(--accent); }
+.signal-pulse { transform-origin:390px 112px; animation:signal-breathe 5s ease-in-out infinite; }
+@keyframes signal-breathe { 50% { transform:scale(1.12); opacity:.4; } }
+nav.tabs { display:flex; align-items:center; gap:28px; border-bottom:1px solid var(--line); margin-bottom:26px; }
+nav.tabs button { display:flex; align-items:center; gap:9px; border:0; background:transparent; color:var(--muted); padding:15px 0; border-bottom:2px solid transparent; margin-bottom:-1px; font:inherit; font-size:13px; }
+nav.tabs button::before { content:attr(data-number); font:10px ui-monospace,monospace; opacity:.65; }
+nav.tabs button[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
+.nav-note { margin-left:auto; font-size:10px; color:var(--muted); display:flex; align-items:center; gap:8px; }
+.nav-note span { width:5px; height:5px; border-radius:50%; background:var(--accent); }
+.panel { background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:24px; }
+.layout { display:grid; grid-template-columns:270px minmax(0,1fr); gap:24px; align-items:start; }
+.layout > *, .workbench > * { min-width:0; }
+.library { border:1px solid var(--line); border-radius:12px; background:var(--panel); overflow:hidden; }
+.library-top { padding:19px 18px 16px; border-bottom:1px solid var(--line); }
+.library-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:13px; }
+.library-heading h2 { margin:0; font-size:13px; }
+.counter { background:var(--code); border:1px solid var(--line); padding:1px 7px; border-radius:5px; color:var(--muted); font:10px/1.6 ui-monospace,monospace; }
+.search-box { display:flex; align-items:center; border:1px solid var(--line); border-radius:7px; background:var(--code); padding-left:10px; gap:8px; }
+.search-box svg { width:15px; height:15px; flex-shrink:0; color:var(--muted); }
+.search-box input { border:0; background:transparent; min-width:0; width:100%; padding:9px 8px 9px 0; color:var(--ink); font-size:12px; }
+.filter-toggle { display:none; }
+.filters { display:grid; gap:13px; padding:16px 18px; border-bottom:1px solid var(--line); }
+.filters label { display:block; color:var(--muted); font-size:10px; margin-bottom:6px; letter-spacing:.7px; text-transform:uppercase; }
+.chips { display:flex; flex-wrap:wrap; gap:5px; }
+.chip { border:1px solid var(--line); background:transparent; color:var(--muted); border-radius:5px; padding:5px 8px; font-size:11px; }
+.chip[aria-pressed="true"] { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
+select,input[type="password"],input[type="text"] { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:7px 9px; }
+.filters select { width:100%; font-size:11px; }
+.list { display:flex; flex-direction:column; max-height:340px; overflow:auto; scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+.card { position:relative; text-align:left; border:0; border-bottom:1px solid var(--line); background:var(--panel); color:var(--ink); padding:16px 18px; font:inherit; }
+.card:last-child { border-bottom:0; }
+.card:hover { background:var(--code); }
+.card[aria-current="true"] { background:var(--accent-soft); box-shadow:inset 3px 0 var(--accent); }
+.card[aria-current="true"] .t { color:var(--accent); }
+.card .t { font-size:13px; font-weight:600; line-height:1.5; padding-right:9px; }
+.card[aria-current="true"]::after { content:"↗"; position:absolute; top:15px; right:12px; color:var(--accent); }
+.card .m { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+.tag { display:inline-block; font-size:11px; line-height:1.65; padding:1px 6px; border-radius:4px; background:var(--code); color:var(--muted); border:1px solid var(--line); }
+.tag[data-kind="choice"] { color:var(--accent); background:var(--accent-soft); border-color:transparent; }
+.tag[data-kind="noul"] { color:var(--good); background:var(--good-soft); border-color:transparent; }
+.tag[data-kind="score"],.tag[data-kind="several"] { color:var(--warn); }
+.empty { color:var(--muted); padding:24px 18px; font-size:12px; }
+.example-panel { padding:0; overflow:hidden; }
+.example-heading { padding:23px 24px 19px; border-bottom:1px solid var(--line); }
+.section-kicker { font:10px ui-monospace,monospace; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:10px; }
+h2 { font-size:20px; line-height:1.3; letter-spacing:-.5px; margin:0 0 10px; font-weight:600; }
+h3 { font-size:11px; margin:24px 0 12px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; }
+#ex-meta { display:flex; flex-wrap:wrap; gap:5px; }
+.ex-note { margin:12px 0 0; font-size:12px; color:var(--muted); line-height:1.65; max-width:740px; }
+.workbench { display:grid; grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); }
+.request-pane { padding:20px 22px; border-right:1px solid var(--line); }
+.pane-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:13px; }
+.pane-heading h3 { margin:0; letter-spacing:1px; font-size:10px; }
+.method { font:9px ui-monospace,monospace; color:var(--muted); }
+.method b { color:var(--good); margin-right:5px; }
+textarea { display:block; width:100%; height:320px; min-height:200px; resize:vertical; background:var(--code); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:16px; font-size:12px; line-height:1.7; tab-size:2; }
+.row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px; }
+.btn { border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); padding:8px 12px; font:inherit; font-size:12px; transition:background .15s,transform .15s; }
+/* Header controls share the same dimensions on desktop and mobile. */
+.bar-top .header-actions { display:flex; align-items:center; gap:9px; margin-left:auto; flex-shrink:0; }
+.bar-top .header-actions > .seg { height:40px; padding:0; border:0; gap:4px; flex-shrink:0; }
+.bar-top .header-actions > .seg button,.bar-top .header-actions > .btn { display:inline-flex; align-items:center; justify-content:center; height:40px; min-width:40px; padding:0 12px; border:1px solid var(--line); border-radius:6px; font-size:12px; line-height:1; flex-shrink:0; }
+.bar-top .header-actions > .seg button,.bar-top .header-actions > #theme { width:40px; padding:0; }
+.btn:hover:not(:disabled) { background:var(--code); }
+.btn:active:not(:disabled) { transform:translateY(1px); }
+.btn.primary { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600; }
+.btn.primary:hover:not(:disabled) { filter:brightness(1.1); background:var(--accent); }
+#send::after { content:"↗"; margin-left:20px; }
+#send:disabled::after { content:"…"; }
+.request-actions { justify-content:space-between; }
+.request-tools { display:flex; gap:5px; }
+.request-tools .btn { padding:6px; border-color:transparent; font-size:10px; color:var(--muted); }
+.request-foot { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; min-height:18px; }
+kbd { font-size:9px; color:var(--muted); }
+#status { font-size:10px; }
+.response-pane { padding:20px 22px; background:color-mix(in srgb,var(--code) 45%,var(--panel)); }
+.response-indicator { width:6px; height:6px; border:1px solid var(--muted); border-radius:50%; }
+.response-pane:has(.answers) .response-indicator { border:0; background:var(--good); box-shadow:0 0 0 4px var(--good-soft); }
+.result-empty { min-height:360px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:24px 12px; }
+.empty-orbit { width:90px; height:90px; border:1px solid var(--line); border-radius:50%; display:grid; place-items:center; position:relative; margin-bottom:24px; }
+.empty-orbit::before { content:""; position:absolute; inset:12px; border:1px dashed var(--line); border-radius:50%; }
+.empty-orbit::after { content:""; position:absolute; width:9px; height:9px; background:var(--lime); border:3px solid var(--panel); box-sizing:content-box; top:2px; right:10px; border-radius:50%; }
+.empty-orbit span { font-size:28px; color:var(--accent); }
+.result-empty strong { font-weight:500; font-size:14px; }
+.result-empty p { color:var(--muted); font-size:12px; max-width:215px; line-height:1.7; margin:9px 0 22px; }
+.empty-flow { font:9px ui-monospace,monospace; color:var(--muted); letter-spacing:.5px; }
+.result-empty.loading .empty-orbit { animation:orbit 2s linear infinite; }
+@keyframes orbit { to { transform:rotate(360deg); } }
+.muted { color:var(--muted); }.small { font-size:12px; }
+.error { background:var(--bad-soft); border:1px solid var(--bad); border-radius:7px; padding:12px; margin-top:10px; overflow-wrap:anywhere; }
+.error ul { margin:8px 0 0 16px; padding:0; }
+.answers { display:grid; gap:12px; margin-top:14px; }
+.answer { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; }
+.answer .head { display:flex; flex-wrap:wrap; align-items:baseline; gap:7px; margin-bottom:8px; }
+.answer .qid { font:11px ui-monospace,monospace; }
+.answer .big { width:100%; margin-top:5px; font-size:22px; color:var(--accent); overflow-wrap:anywhere; }
+.answer .small { font-size:11px; }
+.bars { display:grid; grid-template-columns:minmax(50px,38%) 1fr 44px; gap:7px; align-items:center; font-size:11px; margin-top:12px; }
+.bars .lab { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bars .track { background:var(--code); border-radius:3px; height:8px; overflow:hidden; }
+.bars .fill { background:var(--bar); height:100%; }
+.bars .fill.top { background:var(--accent); }.bars .fill.truth { background:var(--good); }
+.bars .val { text-align:right; font-variant-numeric:tabular-nums; }
+.bars.wrap { grid-template-columns:minmax(0,1fr) 30% 44px; }.bars.wrap .lab { white-space:normal; overflow:visible; }
+.big { font-size:28px; letter-spacing:-.8px; font-weight:600; font-variant-numeric:tabular-nums; }
+details { margin-top:15px; }summary { cursor:pointer; color:var(--muted); font-size:12px; }summary:hover { color:var(--accent); }
+pre { background:var(--code); border:1px solid var(--line); border-radius:7px; padding:16px; overflow:auto; margin:10px 0 0; white-space:pre; font-size:11px; line-height:1.7; max-height:500px; }
+.integration { margin:0; padding:17px 22px 20px; border-top:1px solid var(--line); }
+.integration > summary { font-weight:500; color:var(--ink); }.integration > summary::marker { color:var(--accent); }
+.code-tabs { display:flex; gap:3px; margin-top:16px; }
+.code-tabs button { border:0; border-bottom:2px solid transparent; background:transparent; color:var(--muted); padding:8px 14px; font:inherit; font-size:11px; }
+.code-tabs button[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); }
+.code-wrap { position:relative; }.code-wrap pre { margin:0; padding-top:44px; }.copy { position:absolute; top:8px; right:8px; padding:4px 10px; font-size:10px; }
+.keybox { display:none; align-items:center; gap:6px; }.keybox.show { display:flex; }.keybox input { max-width:150px; font-size:12px; }
+.game { max-width:980px; margin:auto; }.game-pick { margin-bottom:22px; flex-wrap:wrap; }.game-pick button { font-size:12px; padding:9px 18px; }
+.arcade { display:grid; grid-template-columns:auto minmax(240px,1fr); gap:20px; align-items:start; }.arcade .board { padding:10px; display:flex; flex-direction:column; align-items:center; }.arcade canvas { display:block; touch-action:none; border-radius:6px; }.arcade .side h2 { margin-bottom:10px; }
+.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0; }.stats > div { padding:14px; border:1px solid var(--line); border-radius:8px; background:var(--code); }.stats .big { font-size:24px; }.stats.wide { grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }.stats.wide > div:nth-child(1) { background:var(--accent-soft); }.stats.wide > div:nth-child(2) { background:var(--good-soft); }
+.speed { margin:10px 0; }.speed input { width:100%; }canvas.spark { display:block; width:100%; height:100px; border-radius:7px; border:1px solid var(--line); box-sizing:border-box; }
+.table-wrap { overflow-x:auto; }.pad { display:grid; grid-template-columns:repeat(3,56px); gap:6px; justify-content:center; margin:10px 0 0; }.pad .btn { height:46px; padding:0; font-size:18px; }
+.foods { padding-left:22px; margin:6px 0; }.foods li { margin:3px 0; }.note { font-weight:600; margin:8px 0; }.note.ok { color:var(--good); }.note.ko { color:var(--bad); }#tetris-next { display:block; margin:4px 0 8px; }
+.score-strip { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:18px; }.score-strip .panel { flex:1; min-width:150px; padding:18px 22px; }.score-strip .panel:first-child { background:var(--accent-soft); }.score-strip .panel:nth-child(2) { background:var(--good-soft); }
+.state-box { background:var(--code); border:1px solid var(--line); border-radius:8px; padding:16px; white-space:pre-wrap; margin:12px 0; }.options { display:grid; gap:8px; margin:10px 0; }.opt { text-align:left; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:7px; padding:12px 16px; font:inherit; }.opt[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-soft); font-weight:600; }.opt.right { border-color:var(--good); background:var(--good-soft); }.opt.wrong { border-color:var(--bad); background:var(--bad-soft); }
+input[type="range"] { width:100%; accent-color:var(--accent); }.verdict { font-size:18px; font-weight:600; margin:6px 0; }.versus { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+table.ref { border-collapse:collapse; width:100%; font-size:12px; }table.ref th,table.ref td { border-bottom:1px solid var(--line); padding:12px; text-align:left; vertical-align:top; }table.ref th { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.5px; background:var(--code); }table.ref code { overflow-wrap:anywhere; font-size:11px; }#api-panel > p { max-width:850px; line-height:1.8; }
+footer { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:28px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:10px; }footer .footer-brand { font-size:16px; letter-spacing:-.7px; font-weight:650; color:var(--ink); margin-right:12px; }footer .mono { font-size:9px; }
+.hidden { display:none !important; }
+@media (max-width:1150px) { .bar-top { padding:18px 24px; gap:12px; }main { padding:0 24px 24px; }.layout { grid-template-columns:240px minmax(0,1fr); gap:18px; }.workbench { grid-template-columns:1fr; }.request-pane { border-right:0; border-bottom:1px solid var(--line); }.result-empty { min-height:210px; padding:16px; }.empty-orbit { width:62px; height:62px; margin-bottom:16px; }.hero-art { height:224px; }.brand-label { display:none; } }
+@media (max-width:860px) { .hero { padding:28px 0; gap:20px; grid-template-columns:1.2fr 1fr; }h1 { font-size:42px; letter-spacing:-2px; }.hero-art { height:224px; }.hero-art .decision-scene { width:100%; }.art-label { font-size:8px; }.art-caption { font-size:8px; }.layout { grid-template-columns:1fr; }.library { display:grid; grid-template-columns:1fr 1.3fr; }.library-top { grid-column:1 / -1; }.library-heading { margin-bottom:10px; }.filters { border-bottom:0; border-right:1px solid var(--line); }.list { max-height:260px; }.workbench { grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); }.request-pane { border-bottom:0; border-right:1px solid var(--line); }.result-empty { min-height:360px; }.arcade,.versus { grid-template-columns:1fr; }.model { max-width:150px; }.nav-note { display:none; }.stats .big { font-size:20px; } }
+@media (max-width:600px) { .bar-top { padding:16px; gap:10px; flex-wrap:wrap; }.brand { font-size:27px; }.brand svg { width:28px; height:28px; }.server-status { font-size:10px; margin-left:auto; }.bar-top > .spacer,.model { display:none; }.keybox.show { order:2; width:100%; }main { padding:0 16px 22px; }.hero { grid-template-columns:1fr; padding:30px 0 20px; gap:22px; }h1 { font-size:48px; letter-spacing:-2.5px; margin:15px 0; }.hero-copy p { font-size:13px; max-width:320px; }.hero-art { height:224px; }.art-label { top:16px; left:16px; line-height:1.7; }.art-caption { left:16px; bottom:16px; right:16px; }.art-caption strong { max-width:none; }.art-edition { top:18px; right:16px; }nav.tabs { gap:0; justify-content:space-between; margin-bottom:20px; }nav.tabs button { gap:6px; font-size:12px; padding:13px 0; }nav.tabs button::before { font-size:9px; }.library { grid-template-columns:1fr; }.library-top { grid-column:auto; }.filters { border-right:0; border-bottom:1px solid var(--line); grid-template-columns:1fr 1fr; gap:12px; }.filter-toggle { display:block; font-size:11px; padding:5px 8px; }.library-heading { gap:8px; }.library-heading .counter { margin-left:auto; }.library:not(.filters-open) .filters { display:none; }.filters > div:last-child { grid-column:1 / -1; }.list { max-height:215px; }.card { padding:13px 18px; }.workbench { grid-template-columns:1fr; }.request-pane { border-right:0; border-bottom:1px solid var(--line); }.request-pane,.response-pane { padding:18px; }.example-heading { padding:20px 18px; }h2 { font-size:19px; }textarea { height:300px; }.result-empty { min-height:230px; }.panel:not(.example-panel):not(.board) { padding:18px; }.game-pick { display:flex; }.game-pick button { padding:8px; font-size:11px; }.stats { gap:5px; }.stats > div { padding:9px; }.stats .small { font-size:10px; }.score-strip .panel { min-width:90px; }.score-strip { gap:8px; }.score-strip .small { font-size:11px; }table.ref th,table.ref td { padding:9px; }footer { flex-wrap:wrap; }.integration { padding:17px 18px; } }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#view-examples" data-i18n="skipToContent"></a>
+<header>
+  <div class="bar-top">
+    <a class="brand" href="./" aria-label="Sonda"><svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M27 7H17C7 7 7 18 17 18h2c10 0 10 11 0 11H9" stroke="currentColor" stroke-width="6"/><circle cx="28" cy="28" r="3" fill="#E74646"/></svg>sonda</a>
+    <div class="brand-label">Decision intelligence</div>
+    <div class="spacer"></div>
+    <div class="model" id="model-name"></div>
+    <div class="server-status" role="status"><span class="dot" id="health-dot"></span><span id="health-label"></span></div>
+    <div class="keybox" id="keybox">
+      <label class="small muted" for="api-key" data-i18n="apiKey"></label>
+      <input type="password" id="api-key" autocomplete="off" size="18">
+    </div>
+    <div class="header-actions">
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" data-lang="en">EN</button><button type="button" data-lang="pl">PL</button>
+    </div>
+    <button type="button" class="btn" id="theme" aria-label="Theme">◐</button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 id="hero-title"><span data-i18n="heroIn"></span><span class="accent" data-i18n="heroOut"></span></h1>
+      <p data-i18n="heroDescription"></p>
+    </div>
+    <div class="hero-art" aria-hidden="true"><div class="art-label" data-i18n="signalTitle"></div><span class="art-edition">SONDA</span><svg class="decision-scene" viewBox="0 0 560 224" fill="none" focusable="false"><defs><linearGradient id="signal-path" x1="70" y1="145" x2="475" y2="112" gradientUnits="userSpaceOnUse"><stop stop-color="var(--accent)" stop-opacity=".3"/><stop offset=".65" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--lime)"/></linearGradient><radialGradient id="signal-aura"><stop stop-color="var(--lime)" stop-opacity=".16"/><stop offset="1" stop-color="var(--lime)" stop-opacity="0"/></radialGradient></defs>
+<ellipse cx="390" cy="112" rx="90" ry="75" fill="url(#signal-aura)"/>
+<path d="M56 112H506" stroke="var(--ink)" stroke-opacity=".12" stroke-dasharray="2 6"/>
+<path d="M55 42 C180 42 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.210" stroke-width=".75"/><path d="M55 56 C180 56 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.192" stroke-width=".75"/><path d="M55 70 C180 70 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.174" stroke-width=".75"/><path d="M55 84 C180 84 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.156" stroke-width=".75"/><path d="M55 98 C180 98 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.138" stroke-width=".75"/><path d="M55 112 C180 112 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.120" stroke-width=".75"/><path d="M55 126 C180 126 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.138" stroke-width=".75"/><path d="M55 140 C180 140 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.156" stroke-width=".75"/><path d="M55 154 C180 154 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.174" stroke-width=".75"/><path d="M55 168 C180 168 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.192" stroke-width=".75"/><path d="M55 182 C180 182 247 112 389 112" stroke="var(--accent)" stroke-opacity="0.210" stroke-width=".75"/><circle cx="57" cy="47.00" r="1.33" fill="var(--accent)" opacity="0.55"/><circle cx="57" cy="62.87" r="1.17" fill="var(--accent)" opacity="0.43"/><circle cx="57" cy="77.00" r="1.04" fill="var(--accent)" opacity="0.65"/><circle cx="57" cy="88.70" r="0.94" fill="var(--accent)" opacity="0.27"/><circle cx="57" cy="98.77" r="0.91" fill="var(--accent)" opacity="0.32"/><circle cx="57" cy="108.97" r="0.98" fill="var(--accent)" opacity="0.32"/><circle cx="57" cy="121.02" r="0.76" fill="var(--accent)" opacity="0.35"/><circle cx="57" cy="135.47" r="0.96" fill="var(--accent)" opacity="0.46"/><circle cx="57" cy="151.47" r="0.85" fill="var(--accent)" opacity="0.23"/><circle cx="57" cy="167.17" r="0.85" fill="var(--accent)" opacity="0.44"/><circle cx="57" cy="180.96" r="1.04" fill="var(--accent)" opacity="0.53"/><circle cx="74" cy="49.38" r="1.45" fill="var(--accent)" opacity="0.39"/><circle cx="74" cy="64.19" r="0.75" fill="var(--accent)" opacity="0.53"/><circle cx="74" cy="76.81" r="1.41" fill="var(--accent)" opacity="0.38"/><circle cx="74" cy="87.38" r="1.31" fill="var(--accent)" opacity="0.33"/><circle cx="74" cy="97.30" r="1.56" fill="var(--accent)" opacity="0.58"/><circle cx="74" cy="108.33" r="1.44" fill="var(--accent)" opacity="0.63"/><circle cx="74" cy="121.59" r="0.88" fill="var(--accent)" opacity="0.45"/><circle cx="74" cy="136.83" r="1.38" fill="var(--accent)" opacity="0.56"/><circle cx="74" cy="152.60" r="1.04" fill="var(--accent)" opacity="0.26"/><circle cx="74" cy="167.14" r="1.28" fill="var(--accent)" opacity="0.25"/><circle cx="74" cy="179.42" r="1.36" fill="var(--accent)" opacity="0.20"/><circle cx="91" cy="51.88" r="1.10" fill="var(--accent)" opacity="0.42"/><circle cx="91" cy="65.21" r="0.77" fill="var(--accent)" opacity="0.42"/><circle cx="91" cy="76.39" r="1.15" fill="var(--accent)" opacity="0.37"/><circle cx="91" cy="86.25" r="1.55" fill="var(--accent)" opacity="0.59"/><circle cx="91" cy="96.47" r="1.54" fill="var(--accent)" opacity="0.31"/><circle cx="91" cy="108.46" r="0.68" fill="var(--accent)" opacity="0.37"/><circle cx="91" cy="122.61" r="0.76" fill="var(--accent)" opacity="0.52"/><circle cx="91" cy="137.95" r="0.91" fill="var(--accent)" opacity="0.26"/><circle cx="91" cy="152.83" r="0.93" fill="var(--accent)" opacity="0.38"/><circle cx="91" cy="165.85" r="1.39" fill="var(--accent)" opacity="0.41"/><circle cx="91" cy="176.75" r="0.95" fill="var(--accent)" opacity="0.50"/><circle cx="108" cy="54.09" r="0.70" fill="var(--accent)" opacity="0.29"/><circle cx="108" cy="65.87" r="1.34" fill="var(--accent)" opacity="0.54"/><circle cx="108" cy="75.91" r="0.75" fill="var(--accent)" opacity="0.23"/><circle cx="108" cy="85.57" r="1.16" fill="var(--accent)" opacity="0.50"/><circle cx="108" cy="96.40" r="0.67" fill="var(--accent)" opacity="0.40"/><circle cx="108" cy="109.27" r="0.92" fill="var(--accent)" opacity="0.24"/><circle cx="108" cy="123.79" r="0.82" fill="var(--accent)" opacity="0.33"/><circle cx="108" cy="138.59" r="1.12" fill="var(--accent)" opacity="0.25"/><circle cx="108" cy="152.12" r="1.27" fill="var(--accent)" opacity="0.60"/><circle cx="108" cy="163.59" r="1.33" fill="var(--accent)" opacity="0.23"/><circle cx="108" cy="173.48" r="1.30" fill="var(--accent)" opacity="0.49"/><circle cx="125" cy="55.93" r="0.66" fill="var(--accent)" opacity="0.37"/><circle cx="125" cy="66.30" r="1.30" fill="var(--accent)" opacity="0.63"/><circle cx="125" cy="75.67" r="1.58" fill="var(--accent)" opacity="0.46"/><circle cx="125" cy="85.54" r="1.24" fill="var(--accent)" opacity="0.63"/><circle cx="125" cy="97.09" r="0.86" fill="var(--accent)" opacity="0.43"/><circle cx="125" cy="110.51" r="0.71" fill="var(--accent)" opacity="0.55"/><circle cx="125" cy="124.83" r="1.30" fill="var(--accent)" opacity="0.29"/><circle cx="125" cy="138.55" r="0.85" fill="var(--accent)" opacity="0.44"/><circle cx="125" cy="150.52" r="1.40" fill="var(--accent)" opacity="0.26"/><circle cx="125" cy="160.67" r="0.97" fill="var(--accent)" opacity="0.43"/><circle cx="125" cy="170.01" r="0.91" fill="var(--accent)" opacity="0.60"/><circle cx="142" cy="57.46" r="1.38" fill="var(--accent)" opacity="0.63"/><circle cx="142" cy="66.77" r="1.29" fill="var(--accent)" opacity="0.51"/><circle cx="142" cy="75.92" r="0.94" fill="var(--accent)" opacity="0.43"/><circle cx="142" cy="86.26" r="1.08" fill="var(--accent)" opacity="0.42"/><circle cx="142" cy="98.40" r="0.71" fill="var(--accent)" opacity="0.58"/><circle cx="142" cy="111.90" r="0.80" fill="var(--accent)" opacity="0.41"/><circle cx="142" cy="125.46" r="1.58" fill="var(--accent)" opacity="0.43"/><circle cx="142" cy="137.75" r="1.52" fill="var(--accent)" opacity="0.32"/><circle cx="142" cy="148.22" r="1.12" fill="var(--accent)" opacity="0.37"/><circle cx="142" cy="157.42" r="0.97" fill="var(--accent)" opacity="0.37"/><circle cx="142" cy="166.67" r="1.10" fill="var(--accent)" opacity="0.58"/><circle cx="159" cy="58.88" r="1.62" fill="var(--accent)" opacity="0.24"/><circle cx="159" cy="67.56" r="1.32" fill="var(--accent)" opacity="0.44"/><circle cx="159" cy="76.84" r="1.06" fill="var(--accent)" opacity="0.22"/><circle cx="159" cy="87.68" r="1.01" fill="var(--accent)" opacity="0.34"/><circle cx="159" cy="100.09" r="1.02" fill="var(--accent)" opacity="0.47"/><circle cx="159" cy="113.13" r="1.02" fill="var(--accent)" opacity="0.33"/><circle cx="159" cy="125.49" r="0.92" fill="var(--accent)" opacity="0.64"/><circle cx="159" cy="136.25" r="1.04" fill="var(--accent)" opacity="0.64"/><circle cx="159" cy="145.49" r="0.82" fill="var(--accent)" opacity="0.50"/><circle cx="159" cy="154.17" r="1.20" fill="var(--accent)" opacity="0.52"/><circle cx="159" cy="163.64" r="1.16" fill="var(--accent)" opacity="0.59"/><circle cx="176" cy="60.44" r="1.24" fill="var(--accent)" opacity="0.22"/><circle cx="176" cy="68.89" r="1.33" fill="var(--accent)" opacity="0.48"/><circle cx="176" cy="78.48" r="0.90" fill="var(--accent)" opacity="0.53"/><circle cx="176" cy="89.64" r="1.49" fill="var(--accent)" opacity="0.32"/><circle cx="176" cy="101.87" r="0.80" fill="var(--accent)" opacity="0.33"/><circle cx="176" cy="113.98" r="1.24" fill="var(--accent)" opacity="0.40"/><circle cx="176" cy="124.90" r="0.72" fill="var(--accent)" opacity="0.40"/><circle cx="176" cy="134.24" r="1.20" fill="var(--accent)" opacity="0.46"/><circle cx="176" cy="142.60" r="1.00" fill="var(--accent)" opacity="0.55"/><circle cx="176" cy="151.16" r="1.33" fill="var(--accent)" opacity="0.32"/><circle cx="176" cy="160.97" r="1.00" fill="var(--accent)" opacity="0.62"/><circle cx="193" cy="62.38" r="0.87" fill="var(--accent)" opacity="0.40"/><circle cx="193" cy="70.87" r="0.95" fill="var(--accent)" opacity="0.46"/><circle cx="193" cy="80.75" r="1.45" fill="var(--accent)" opacity="0.26"/><circle cx="193" cy="91.91" r="0.84" fill="var(--accent)" opacity="0.23"/><circle cx="193" cy="103.47" r="0.78" fill="var(--accent)" opacity="0.43"/><circle cx="193" cy="114.32" r="1.14" fill="var(--accent)" opacity="0.63"/><circle cx="193" cy="123.76" r="1.10" fill="var(--accent)" opacity="0.44"/><circle cx="193" cy="131.96" r="0.68" fill="var(--accent)" opacity="0.30"/><circle cx="193" cy="139.83" r="0.96" fill="var(--accent)" opacity="0.31"/><circle cx="193" cy="148.49" r="1.44" fill="var(--accent)" opacity="0.39"/><circle cx="193" cy="158.58" r="0.79" fill="var(--accent)" opacity="0.44"/><circle cx="210" cy="64.89" r="0.81" fill="var(--accent)" opacity="0.28"/><circle cx="210" cy="73.52" r="1.26" fill="var(--accent)" opacity="0.24"/><circle cx="210" cy="83.47" r="1.41" fill="var(--accent)" opacity="0.40"/><circle cx="210" cy="94.21" r="0.71" fill="var(--accent)" opacity="0.50"/><circle cx="210" cy="104.74" r="1.61" fill="var(--accent)" opacity="0.53"/><circle cx="210" cy="114.16" r="1.49" fill="var(--accent)" opacity="0.62"/><circle cx="210" cy="122.27" r="0.92" fill="var(--accent)" opacity="0.42"/><circle cx="210" cy="129.66" r="1.39" fill="var(--accent)" opacity="0.38"/><circle cx="210" cy="137.35" r="1.62" fill="var(--accent)" opacity="0.39"/><circle cx="210" cy="146.17" r="0.67" fill="var(--accent)" opacity="0.24"/><circle cx="210" cy="156.29" r="1.08" fill="var(--accent)" opacity="0.21"/><circle cx="227" cy="68.03" r="1.26" fill="var(--accent)" opacity="0.65"/><circle cx="227" cy="76.72" r="1.58" fill="var(--accent)" opacity="0.64"/><circle cx="227" cy="86.42" r="0.90" fill="var(--accent)" opacity="0.28"/><circle cx="227" cy="96.35" r="0.72" fill="var(--accent)" opacity="0.62"/><circle cx="227" cy="105.57" r="0.68" fill="var(--accent)" opacity="0.23"/><circle cx="227" cy="113.60" r="1.32" fill="var(--accent)" opacity="0.63"/><circle cx="227" cy="120.65" r="1.18" fill="var(--accent)" opacity="0.23"/><circle cx="227" cy="127.56" r="0.69" fill="var(--accent)" opacity="0.57"/><circle cx="227" cy="135.22" r="1.34" fill="var(--accent)" opacity="0.34"/><circle cx="227" cy="144.09" r="1.63" fill="var(--accent)" opacity="0.33"/><circle cx="227" cy="153.89" r="0.80" fill="var(--accent)" opacity="0.63"/><circle cx="244" cy="71.76" r="0.71" fill="var(--accent)" opacity="0.36"/><circle cx="244" cy="80.30" r="0.83" fill="var(--accent)" opacity="0.49"/><circle cx="244" cy="89.38" r="1.14" fill="var(--accent)" opacity="0.31"/><circle cx="244" cy="98.18" r="1.28" fill="var(--accent)" opacity="0.25"/><circle cx="244" cy="106.02" r="1.63" fill="var(--accent)" opacity="0.55"/><circle cx="244" cy="112.82" r="0.86" fill="var(--accent)" opacity="0.47"/><circle cx="244" cy="119.12" r="0.92" fill="var(--accent)" opacity="0.46"/><circle cx="244" cy="125.77" r="0.97" fill="var(--accent)" opacity="0.29"/><circle cx="244" cy="133.40" r="1.14" fill="var(--accent)" opacity="0.23"/><circle cx="244" cy="142.06" r="1.64" fill="var(--accent)" opacity="0.55"/><circle cx="244" cy="151.16" r="0.88" fill="var(--accent)" opacity="0.47"/><circle cx="261" cy="75.97" r="0.83" fill="var(--accent)" opacity="0.28"/><circle cx="261" cy="84.03" r="1.03" fill="var(--accent)" opacity="0.52"/><circle cx="261" cy="92.18" r="0.72" fill="var(--accent)" opacity="0.62"/><circle cx="261" cy="99.68" r="0.90" fill="var(--accent)" opacity="0.27"/><circle cx="261" cy="106.22" r="1.14" fill="var(--accent)" opacity="0.61"/><circle cx="261" cy="112.04" r="1.07" fill="var(--accent)" opacity="0.44"/><circle cx="261" cy="117.84" r="1.64" fill="var(--accent)" opacity="0.44"/><circle cx="261" cy="124.32" r="1.00" fill="var(--accent)" opacity="0.29"/><circle cx="261" cy="131.76" r="1.17" fill="var(--accent)" opacity="0.48"/><circle cx="261" cy="139.89" r="1.24" fill="var(--accent)" opacity="0.29"/><circle cx="261" cy="147.98" r="0.66" fill="var(--accent)" opacity="0.63"/><circle cx="278" cy="80.48" r="1.34" fill="var(--accent)" opacity="0.58"/><circle cx="278" cy="87.75" r="1.49" fill="var(--accent)" opacity="0.39"/><circle cx="278" cy="94.73" r="0.84" fill="var(--accent)" opacity="0.63"/><circle cx="278" cy="100.92" r="1.55" fill="var(--accent)" opacity="0.23"/><circle cx="278" cy="106.33" r="1.28" fill="var(--accent)" opacity="0.43"/><circle cx="278" cy="111.42" r="0.67" fill="var(--accent)" opacity="0.46"/><circle cx="278" cy="116.87" r="1.30" fill="var(--accent)" opacity="0.40"/><circle cx="278" cy="123.12" r="0.91" fill="var(--accent)" opacity="0.60"/><circle cx="278" cy="130.13" r="1.32" fill="var(--accent)" opacity="0.33"/><circle cx="278" cy="137.40" r="1.43" fill="var(--accent)" opacity="0.61"/><circle cx="278" cy="144.28" r="1.04" fill="var(--accent)" opacity="0.46"/><circle cx="295" cy="85.09" r="0.74" fill="var(--accent)" opacity="0.26"/><circle cx="295" cy="91.33" r="1.50" fill="var(--accent)" opacity="0.63"/><circle cx="295" cy="97.04" r="1.58" fill="var(--accent)" opacity="0.27"/><circle cx="295" cy="102.02" r="1.35" fill="var(--accent)" opacity="0.38"/><circle cx="295" cy="106.52" r="0.87" fill="var(--accent)" opacity="0.60"/><circle cx="295" cy="111.08" r="0.75" fill="var(--accent)" opacity="0.24"/><circle cx="295" cy="116.19" r="1.00" fill="var(--accent)" opacity="0.27"/><circle cx="295" cy="122.03" r="1.05" fill="var(--accent)" opacity="0.48"/><circle cx="295" cy="128.32" r="1.17" fill="var(--accent)" opacity="0.61"/><circle cx="295" cy="134.51" r="1.13" fill="var(--accent)" opacity="0.27"/><circle cx="295" cy="140.12" r="1.20" fill="var(--accent)" opacity="0.21"/><circle cx="312" cy="89.67" r="1.31" fill="var(--accent)" opacity="0.27"/><circle cx="312" cy="94.73" r="1.14" fill="var(--accent)" opacity="0.40"/><circle cx="312" cy="99.21" r="1.58" fill="var(--accent)" opacity="0.26"/><circle cx="312" cy="103.16" r="0.93" fill="var(--accent)" opacity="0.35"/><circle cx="312" cy="106.94" r="1.17" fill="var(--accent)" opacity="0.37"/><circle cx="312" cy="111.03" r="1.63" fill="var(--accent)" opacity="0.62"/><circle cx="312" cy="115.71" r="1.59" fill="var(--accent)" opacity="0.50"/><circle cx="312" cy="120.90" r="1.45" fill="var(--accent)" opacity="0.45"/><circle cx="312" cy="126.22" r="0.85" fill="var(--accent)" opacity="0.27"/><circle cx="312" cy="131.21" r="0.84" fill="var(--accent)" opacity="0.55"/><circle cx="312" cy="135.60" r="1.32" fill="var(--accent)" opacity="0.22"/><circle cx="329" cy="94.15" r="0.94" fill="var(--accent)" opacity="0.23"/><circle cx="329" cy="98.00" r="1.17" fill="var(--accent)" opacity="0.35"/><circle cx="329" cy="101.37" r="1.13" fill="var(--accent)" opacity="0.37"/><circle cx="329" cy="104.46" r="1.05" fill="var(--accent)" opacity="0.40"/><circle cx="329" cy="107.64" r="1.44" fill="var(--accent)" opacity="0.23"/><circle cx="329" cy="111.22" r="1.41" fill="var(--accent)" opacity="0.46"/><circle cx="329" cy="115.27" r="1.44" fill="var(--accent)" opacity="0.27"/><circle cx="329" cy="119.58" r="0.94" fill="var(--accent)" opacity="0.61"/><circle cx="329" cy="123.78" r="1.61" fill="var(--accent)" opacity="0.32"/><circle cx="329" cy="127.56" r="1.03" fill="var(--accent)" opacity="0.35"/><circle cx="329" cy="130.88" r="0.98" fill="var(--accent)" opacity="0.63"/><circle cx="346" cy="98.53" r="1.15" fill="var(--accent)" opacity="0.39"/><circle cx="346" cy="101.25" r="1.55" fill="var(--accent)" opacity="0.49"/><circle cx="346" cy="103.67" r="1.59" fill="var(--accent)" opacity="0.49"/><circle cx="346" cy="106.02" r="1.09" fill="var(--accent)" opacity="0.24"/><circle cx="346" cy="108.59" r="1.15" fill="var(--accent)" opacity="0.43"/><circle cx="346" cy="111.52" r="1.27" fill="var(--accent)" opacity="0.58"/><circle cx="346" cy="114.74" r="1.02" fill="var(--accent)" opacity="0.45"/><circle cx="346" cy="118.00" r="1.47" fill="var(--accent)" opacity="0.63"/><circle cx="346" cy="121.03" r="1.47" fill="var(--accent)" opacity="0.32"/><circle cx="346" cy="123.70" r="1.47" fill="var(--accent)" opacity="0.50"/><circle cx="346" cy="126.10" r="0.97" fill="var(--accent)" opacity="0.45"/><path class="signal-trail" d="M57 155C161 165 204 93 283 104S364 112 390 112H484" stroke="url(#signal-path)" stroke-width="2.2" stroke-linecap="round"/>
+<circle cx="57" cy="155" r="3" fill="var(--accent)"/><circle cx="228" cy="113" r="3" fill="var(--accent)"/>
+<circle cx="390" cy="112" r="22" stroke="var(--accent)" stroke-opacity=".28"/><circle class="signal-pulse" cx="390" cy="112" r="34" stroke="var(--accent)" stroke-opacity=".13"/>
+<circle cx="390" cy="112" r="10" fill="var(--lime)" stroke="var(--accent)" stroke-width="1.5"/><circle cx="390" cy="112" r="2" fill="#293dd2"/>
+<path d="m477 106 7 6-7 6" stroke="var(--accent)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="var(--muted)" font-family="monospace" font-size="8" letter-spacing="1.4"><text x="57" y="183" data-i18n="signalInput"></text><text x="410" y="183" data-i18n="signalOutput"></text></g>
+<path d="M57 174v-5m0-125v-5m429 135v-5" stroke="var(--muted)" stroke-opacity=".4"/>
+</svg><div class="art-caption"><strong data-i18n="signalCaption"></strong><span><i></i><i></i><i></i><i></i></span></div></div>
+  </section>
+  <nav class="tabs" role="tablist" aria-label="Sonda">
+    <button type="button" role="tab" id="tab-examples" aria-controls="view-examples" data-tab="examples" data-number="01" data-i18n="tabExamples"></button>
+    <button type="button" role="tab" id="tab-game" aria-controls="view-game" data-tab="game" data-number="02" data-i18n="tabGame"></button>
+    <button type="button" role="tab" id="tab-metrics" aria-controls="view-metrics" data-tab="metrics" data-number="03" data-i18n="tabMetrics"></button>
+    <button type="button" role="tab" id="tab-api" aria-controls="view-api" data-tab="api" data-number="04" data-i18n="tabApi"></button>
+    <div class="nav-note"><span></span><span data-i18n="navNote" style="width:auto;height:auto;background:none"></span></div>
+  </nav>
+  <section id="view-examples" role="tabpanel" aria-labelledby="tab-examples" tabindex="0">
+    <div class="layout">
+      <aside class="library" aria-labelledby="library-title">
+        <div class="library-top">
+          <div class="library-heading"><h2 id="library-title" data-i18n="library"></h2><span class="counter" id="example-count" role="status"></span><button type="button" class="btn filter-toggle" id="filter-toggle" aria-controls="example-filters" aria-expanded="false" data-i18n="showFilters"></button></div>
+          <label class="search-box"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="m13 13 4 4" stroke="currentColor" stroke-width="1.5"/></svg><input type="search" id="example-search" autocomplete="off"></label>
+        </div>
+        <div class="filters" id="example-filters">
+          <div><label id="filter-type-label" data-i18n="filterType"></label><span class="chips" id="f-type" role="group" aria-labelledby="filter-type-label"></span></div>
+          <div><label id="filter-data-label" data-i18n="filterData"></label><span class="chips" id="f-data" role="group" aria-labelledby="filter-data-label"></span></div>
+          <div><label for="f-domain" data-i18n="filterDomain"></label><select id="f-domain"></select></div>
+        </div>
+        <div class="list" id="example-list"></div>
+      </aside>
+      <div class="panel example-panel">
+        <div class="example-heading">
+          <div class="section-kicker" data-i18n="workspace"></div>
+          <h2 id="ex-title"></h2><div id="ex-meta"></div><p class="ex-note" id="ex-note"></p>
+        </div>
+        <div class="workbench">
+          <div class="request-pane">
+            <div class="pane-heading"><h3><label for="request" data-i18n="request"></label></h3><span class="method"><b>POST</b> /v1/systemone</span></div>
+            <textarea id="request" spellcheck="false" aria-label="Request JSON"></textarea>
+            <div class="row request-actions">
+              <button type="button" class="btn primary" id="send" data-i18n="send"></button>
+              <div class="request-tools"><button type="button" class="btn" id="reset" data-i18n="reset"></button><button type="button" class="btn" id="format" data-i18n="format"></button></div>
+            </div>
+            <div class="request-foot"><span class="muted" id="status" role="status"></span><kbd id="send-shortcut">Ctrl ↵</kbd></div>
+          </div>
+          <div class="response-pane">
+            <div class="pane-heading"><h3 data-i18n="response"></h3><span class="response-indicator" aria-hidden="true"></span></div>
+            <div id="result" aria-live="polite" aria-busy="false"></div>
+          </div>
+        </div>
+        <details class="integration"><summary data-i18n="code"></summary>
+          <div class="code-tabs" role="tablist" id="code-tabs" aria-label="Code">
+            <button type="button" role="tab" aria-controls="code" data-code="curl">curl</button><button type="button" role="tab" aria-controls="code" data-code="python">Python</button><button type="button" role="tab" aria-controls="code" data-code="js">JavaScript</button>
+          </div>
+          <div class="code-wrap"><pre id="code" role="tabpanel" tabindex="0"></pre><button type="button" class="btn copy" id="copy" data-i18n="copy"></button></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Game -->
+  <section id="view-game" role="tabpanel" aria-labelledby="tab-game" tabindex="0" class="hidden">
+    <div class="game">
+      <div class="seg game-pick" role="group" aria-label="Game">
+        <button type="button" data-game="judge" data-i18n="gameTitle"></button>
+        <button type="button" data-game="snake" data-i18n="snakeTitle"></button>
+        <button type="button" data-game="tetris" data-i18n="tetrisTitle"></button>
+        <button type="button" data-game="pacman" data-i18n="pacTitle"></button>
+      </div>
+      <div id="game-judge">
+        <div class="score-strip">
+          <div class="panel"><div class="muted small" data-i18n="you"></div><div class="big" id="g-you">0</div></div>
+          <div class="panel"><div class="muted small" data-i18n="model"></div><div class="big" id="g-model">0</div></div>
+          <div class="panel"><div class="muted small" data-i18n="round"></div><div class="big" id="g-round">–</div></div>
+        </div>
+        <div class="panel" id="g-panel"></div>
+      </div>
+      <div id="game-snake" class="arcade hidden">
+        <div class="panel board"><canvas id="snake-canvas" aria-label="Snake"></canvas><div id="snake-pad"></div></div>
+        <div class="panel side" id="snake-side"></div>
+      </div>
+      <div id="game-pacman" class="arcade hidden">
+        <div class="panel board"><canvas id="pacman-canvas" aria-label="Pac-Man"></canvas><div id="pacman-pad"></div></div>
+        <div class="panel side" id="pacman-side"></div>
+      </div>
+      <div id="game-tetris" class="arcade hidden">
+        <div class="panel board"><canvas id="tetris-canvas" aria-label="Tetris"></canvas><div id="tetris-pad"></div></div>
+        <div class="panel side" id="tetris-side"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Metrics -->
+  <section id="view-metrics" role="tabpanel" aria-labelledby="tab-metrics" tabindex="0" class="hidden">
+    <div class="panel" id="metrics-panel"></div>
+  </section>
+
+  <!-- API reference -->
+  <section id="view-api" role="tabpanel" aria-labelledby="tab-api" tabindex="0" class="hidden">
+    <div class="panel" id="api-panel"></div>
+  </section>
+  <footer><div><span class="footer-brand">sonda</span><span data-i18n="footerNote"></span></div><span class="mono">/v1/systemone</span></footer>
+</main>
+
+<script>
+"use strict";
+
+const T = {
+  en: {
+    signalTitle: "How Sonda works", signalInput: "DATA + QUESTION", signalOutput: "ANSWER", signalCaption: "The model answers using the data you provide.",
+    eyebrow: "Try the Sonda model", heroIn: "Data and a question.", heroOut: "The model’s answer.",
+    heroDescription: "Choose an example or enter your own data and question. See the model’s answer and probabilities.",
+    artLabel: "The shape of a decision", artCaption: "One pass. A clear direction.", navNote: "Questions and answers through the API",
+    showFilters: "Filters +", hideFilters: "Filters −", library: "Explore examples", search: "Find an example…", workspace: "Playground / live request",
+    emptyTitle: "Your answer will appear here", emptyDescription: "Run a request to see the result and probabilities.",
+    emptyFlow: "data → model → answer", footerNote: "Sonda model examples and API",
+    online: "Server online", offline: "Server offline", connecting: "Connecting…", themeLabel: "Switch color theme",
+    skipToContent: "Skip to playground", examplesFailed: "Examples could not be loaded. Refresh the page to try again.", copyFailed: "Select and copy the code manually.",
+
+    apiKey: "API key", tabExamples: "Examples", tabGame: "Games", tabApi: "API",
+    filterType: "Question", filterData: "Data", filterDomain: "Domain",
+    all: "All", several: "several", text: "text", object: "JSON object", list: "list / table", allDomains: "All domains",
+    request: "Request", send: "Run request", reset: "Reset", format: "Format", code: "Take it into your code", copy: "Copy", copied: "Copied",
+    sending: "Asking the model…", noMatch: "No example matches these filters.",
+    badJson: "The request is not valid JSON", http: "HTTP", latency: "latency", tokens: "input tokens",
+    response: "Response", rawJson: "Raw response", omitted: "Left out by the output filter",
+    pYes: "P(yes)", yes: "yes", no: "no", expectedLevel: "expected level", mostLikely: "most likely",
+    needKey: "This server needs an API key: enter it at the top (it stays in this tab only).",
+    unreachable: "The server did not answer.",
+    you: "You", model: "Model", round: "Round",
+    gameTitle: "Who judges better?",
+    gameIntro: "Ten cases from the examples. Pick an answer and say how sure you are; then the model answers with probabilities. Each round gives up to 100 points: 100 × (1 − Brier error / 2). A right answer with high confidence scores most — and a wrong one with high confidence costs most, for you and for the model alike.",
+    gameDomain: "Domain of the cases", start: "Start", yourAnswer: "Your answer", confidence: "How sure are you?",
+    check: "Check", next: "Next case", again: "Play again", correct: "Answer by the example's author",
+    roundPoints: "points this round", modelThinks: "The model's distribution", youWin: "You judged better than the model!",
+    modelWins: "The model judged better this time.", tie: "A draw.", final: "Final score",
+    noCases: "No cases with a known answer for this domain.", skip: "Skip",
+    snakeTitle: "Snake", tetrisTitle: "Tetris", modeYou: "You", modeModel: "Model", modeModelRaw: "Model: board only",
+    points: "Points", length: "Length", best: "Best", lines: "Lines", level: "Level", nextPiece: "Next",
+    moves: "Moves", pieces: "Pieces", agree: "agrees with the heuristic",
+    play: "Start", resume: "Resume", pause: "Pause", gameOver: "Game over", paused: "Paused",
+    pressStart: "Space or an arrow to start", modelStart: "Space or the button: the model plays", letModelPlay: "Let the model play",
+    hitWall: "The snake hit the wall.", hitSelf: "The snake bit its own tail.", modelError: "The model did not answer — {msg}",
+    lastDecision: "The model's last decision", requestShown: "The request sent to the model",
+    snakeKeys: "Arrows or WASD steer, Space pauses. On a phone: swipe on the board or use the buttons.",
+    snakeModelIntro: "The model steers. Before every step this page works out, for each direction, whether it is safe, how far the food would be and how many free cells would be left, and asks the model one choice question: the code computes, the model decides.",
+    snakeRawIntro: "The model gets only the board as rows of text and has to work the move out itself — much harder for a model that answers in a single pass. Compare it with the other model mode.",
+    snakeAsk: "Which way should the snake move? A move that is not safe ends the game. Among safe moves take one that eats the food or gets closer to it, but never one that leaves far fewer free cells than the others.",
+    snakeAskRaw: "Which way should the snake (H) move to reach the food (F) without hitting a wall or its own body (o)?",
+    snakeLegend: "H head, o body, F food, . empty; row 0 is the top, column 0 the left edge",
+    dir_up: "up", dir_down: "down", dir_left: "left", dir_right: "right",
+    snakeFields: {safe: "safe", eats: "eats_food", distance: "distance_to_food", room: "free_cells_after", length: "length",
+                  moves: "moves", legend: "legend", board: "board", direction: "direction"},
+    tetrisFields: {piece: "piece", heights: "column_heights", holes: "holes"},
+    tetrisAsk: "Where should the piece go? Best: no new holes, then more cleared lines, then a lower and flatter stack.",
+    placement: "clears {lines} lines, {holes} new holes, height {height}, bumpiness {bumps}",
+    tetrisModelIntro: "The model plays. For every piece this page computes each placement and its effect, offers the model the 5 best by a classic heuristic in random order, and the model picks one. “Agrees” counts how often it picked the heuristic's favourite.",
+    tetrisKeys: "← → move, ↑ or X rotate, Z rotate back, ↓ faster, Space drops, P pauses.",
+    pacTitle: "Pac-Man", lives: "Lives", dotsLeft: "Dots left", caught: "A ghost caught Pac-Man.",
+    levelUp: "Level {n}: the maze is full again.",
+    pacKeys: "Arrows or WASD steer, Space pauses. On a phone: swipe on the board or use the buttons.",
+    pacModelIntro: "The model steers. Ghosts move a step per turn, so the game waits for the model. Before every step this page works out, for each way, how far the nearest ghost would be (along the maze), how many cells Pac-Man would still reach before any ghost, what the move eats and how far the nearest dot would be, and asks the model one choice question.",
+    pacAsk: "Which way should Pac-Man go? A move that is not safe can cost a life; if no move is safe, take the one with the most free cells. Among safe moves take one that eats something, otherwise the one closest to a dot; while ghosts are frightened, catching one is worth the most.",
+    pacFields: {safe: "safe", ghost: "ghost_distance", room: "free_cells", eats: "eats", dot: "distance_to_dot", prey: "frightened_ghost_distance",
+                moves: "moves", lives: "lives", power: "frightened_turns_left"},
+    eat_dot: "a dot", eat_power: "a power pellet", eat_ghost: "a frightened ghost", eat_nothing: "nothing",
+    tabMetrics: "Metrics", refresh: "Refresh", updated: "updated {time}", keyNeededShort: "API key needed",
+    metricsIntro: "Live numbers from GET /metrics (Prometheus text), refreshed every 5 s while this tab is open.",
+    mRequests: "Requests", mQuestions: "Questions", mRejected: "Rejected", mQueue: "Passes waiting", mRate: "Requests/s",
+    mLatency: "Mean request time", mHistory: "Requests per second (last 5 minutes)", mTimes: "Times",
+    mWhat: "what", mCount: "count", mMean: "mean", mBatch: "Batching",
+    mBatchLine: "{passes} model passes in {batches} forwards · {mean} passes per forward on average · p95 {p95}",
+    mByStatus: "Requests by HTTP status", mByReason: "Rejections by reason", mDropped: "Left out by the answer filter",
+    mOmitted: "whole answers", mRaw: "Raw text (Prometheus)",
+    histNames: {request_seconds: "whole request", forward_seconds: "one forward on the GPU", queue_wait_seconds: "waiting for a forward"},
+    paceLine: "The model answers in {avg} s on average (p95 {p95} s); the fastest pace it keeps up with: one move every {fastest} s.",
+    speed: "Speed", speedValue: "{pct}% of the fastest — one move every {period} s",
+    apiTitle: "How to call the API", endpoint: "Endpoint", meaning: "Meaning",
+    apiIntro: "Send evidence (state) and typed questions; get a probability for every option. The model never writes text, so every answer is a valid, typed value. It answers in one pass, so do sums, unit conversions and date arithmetic in your code and send the results with the data: the model compares and applies rules well, but does not calculate.",
+    calib: "Temperatures of this model (per question type)",
+    typesTitle: "Question types", statusTitle: "Status codes",
+    types: [["noul", "yes/no", "{\"type\": \"noul\", \"instructions\": \"…\"}", "noul: P(yes)"],
+            ["choice", "one of the options", "{\"type\": \"choice\", \"instructions\": \"…\", \"criteria\": {\"a\": \"…\", \"b\": \"…\"}}", "choice, probabilities"],
+            ["score", "a level on an ordered scale", "{\"type\": \"score\", \"instructions\": \"…\", \"criteria\": [\"low\", \"mid\", \"high\"]}", "score (expected level), probabilities"]],
+    statuses: [["200", "answered"], ["400", "the body is not JSON"], ["401", "missing or wrong API key"], ["413", "body too large"],
+               ["422", "invalid request (every error listed as loc + msg) or a prompt too long"], ["503", "busy, retry (Retry-After)"],
+               ["504", "no answer in time"], ["500", "unexpected error (logged on the server)"]],
+    endpoints: [["POST v1/systemone", "decisions (API key when one is set)"], ["GET v1/model", "model, calibration, limits (API key when one is set)"], ["GET health", "is the server up (always open)"], ["GET metrics", "Prometheus metrics (API key when one is set, unless --public-metrics)"]],
+  },
+  pl: {
+    signalTitle: "Jak działa Sonda", signalInput: "DANE I PYTANIE", signalOutput: "ODPOWIEDŹ", signalCaption: "Model odpowiada na podstawie podanych danych.",
+    eyebrow: "Wypróbuj model Sonda", heroIn: "Dane i pytanie.", heroOut: "Odpowiedź modelu.",
+    heroDescription: "Wybierz przykład lub wpisz własne dane i pytanie. Sprawdź odpowiedź modelu i prawdopodobieństwa.",
+    artLabel: "Kształt decyzji", artCaption: "Jeden przebieg. Jasny kierunek.", navNote: "Pytania i odpowiedzi przez API",
+    showFilters: "Filtry +", hideFilters: "Filtry −", library: "Odkrywaj przykłady", search: "Znajdź przykład…", workspace: "Playground / zapytanie na żywo",
+    emptyTitle: "Tutaj pojawi się odpowiedź", emptyDescription: "Wyślij zapytanie, aby zobaczyć wynik i prawdopodobieństwa.",
+    emptyFlow: "dane → model → odpowiedź", footerNote: "Przykłady i API modelu Sonda",
+    online: "Serwer dostępny", offline: "Serwer niedostępny", connecting: "Łączenie…", themeLabel: "Zmień motyw kolorystyczny",
+    skipToContent: "Przejdź do przykładów", examplesFailed: "Nie udało się wczytać przykładów. Odśwież stronę, aby spróbować ponownie.", copyFailed: "Zaznacz i skopiuj kod ręcznie.",
+
+    apiKey: "Klucz API", tabExamples: "Przykłady", tabGame: "Gry", tabApi: "API",
+    filterType: "Pytanie", filterData: "Dane", filterDomain: "Dziedzina",
+    all: "Wszystkie", several: "kilka", text: "tekst", object: "obiekt JSON", list: "lista / tabela", allDomains: "Wszystkie dziedziny",
+    request: "Zapytanie", send: "Wyślij zapytanie", reset: "Przywróć", format: "Formatuj", code: "Przenieś zapytanie do swojego kodu", copy: "Kopiuj", copied: "Skopiowano",
+    sending: "Pytam model…", noMatch: "Żaden przykład nie pasuje do tych filtrów.",
+    badJson: "Zapytanie nie jest poprawnym JSON-em", http: "HTTP", latency: "czas", tokens: "tokeny wejścia",
+    response: "Odpowiedź", rawJson: "Surowa odpowiedź", omitted: "Pominięte przez filtr odpowiedzi",
+    pYes: "P(tak)", yes: "tak", no: "nie", expectedLevel: "oczekiwany poziom", mostLikely: "najbardziej prawdopodobny",
+    needKey: "Ten serwer wymaga klucza API: wpisz go u góry (zostaje tylko w tej karcie).",
+    unreachable: "Serwer nie odpowiedział.",
+    you: "Ty", model: "Model", round: "Runda",
+    gameTitle: "Kto lepiej oceni?",
+    gameIntro: "Dziesięć przypadków z przykładów. Wybierz odpowiedź i powiedz, jak bardzo jesteś pewien; potem model odpowiada prawdopodobieństwami. Runda daje do 100 punktów: 100 × (1 − błąd Briera / 2). Najwięcej daje trafna odpowiedź z dużą pewnością — a najwięcej kosztuje błędna z dużą pewnością, tak samo dla Ciebie i dla modelu.",
+    gameDomain: "Dziedzina przypadków", start: "Start", yourAnswer: "Twoja odpowiedź", confidence: "Jak bardzo jesteś pewien?",
+    check: "Sprawdź", next: "Następny przypadek", again: "Zagraj jeszcze raz", correct: "Odpowiedź autora przykładu",
+    roundPoints: "punktów w tej rundzie", modelThinks: "Rozkład modelu", youWin: "Oceniłeś lepiej niż model!",
+    modelWins: "Tym razem model ocenił lepiej.", tie: "Remis.", final: "Wynik końcowy",
+    noCases: "Brak przypadków ze znaną odpowiedzią w tej dziedzinie.", skip: "Pomiń",
+    snakeTitle: "Wąż", tetrisTitle: "Tetris", modeYou: "Ty", modeModel: "Model", modeModelRaw: "Model: sama plansza",
+    points: "Punkty", length: "Długość", best: "Rekord", lines: "Linie", level: "Poziom", nextPiece: "Następny",
+    moves: "Ruchy", pieces: "Klocki", agree: "zgodność z heurystyką",
+    play: "Start", resume: "Wznów", pause: "Pauza", gameOver: "Koniec gry", paused: "Pauza",
+    pressStart: "Spacja lub strzałka, by zacząć", modelStart: "Spacja lub przycisk: gra model", letModelPlay: "Niech gra model",
+    hitWall: "Wąż uderzył w ścianę.", hitSelf: "Wąż ugryzł własny ogon.", modelError: "Model nie odpowiedział — {msg}",
+    lastDecision: "Ostatnia decyzja modelu", requestShown: "Zapytanie wysłane do modelu",
+    snakeKeys: "Strzałki lub WASD — sterowanie, spacja — pauza. Na telefonie: przesuń palcem po planszy albo użyj przycisków.",
+    snakeModelIntro: "Steruje model. Przed każdym krokiem strona liczy dla każdego kierunku, czy ruch jest bezpieczny, jak daleko będzie jedzenie i ile wolnych pól zostanie, i zadaje modelowi jedno pytanie choice: kod liczy, model decyduje.",
+    snakeRawIntro: "Model dostaje tylko planszę jako wiersze tekstu i sam musi wymyślić ruch — dużo trudniejsze dla modelu, który odpowiada w jednym przebiegu. Porównaj z drugim trybem modelu.",
+    snakeAsk: "W którą stronę wąż ma się ruszyć? Ruch niebezpieczny kończy grę. Spośród bezpiecznych wybierz ten, który zjada jedzenie albo przybliża do niego, ale nigdy taki, po którym zostaje dużo mniej wolnych pól niż po innych.",
+    snakeAskRaw: "W którą stronę ma się ruszyć wąż (H), żeby dojść do jedzenia (F), nie uderzając w ścianę ani we własne ciało (o)?",
+    snakeLegend: "H głowa, o ciało, F jedzenie, . puste; wiersz 0 to góra, kolumna 0 to lewa krawędź",
+    dir_up: "w górę", dir_down: "w dół", dir_left: "w lewo", dir_right: "w prawo",
+    snakeFields: {safe: "bezpieczny", eats: "zjada", distance: "odległość_do_jedzenia", room: "wolne_pola_po_ruchu", length: "długość",
+                  moves: "ruchy", legend: "legenda", board: "plansza", direction: "kierunek"},
+    tetrisFields: {piece: "klocek", heights: "wysokości_kolumn", holes: "dziury"},
+    tetrisAsk: "Gdzie położyć klocek? Najlepiej: bez nowych dziur, potem więcej usuniętych linii, potem niższy i bardziej płaski stos.",
+    placement: "usuwa linii: {lines}, nowe dziury: {holes}, wysokość: {height}, nierówność: {bumps}",
+    tetrisModelIntro: "Gra model. Dla każdego klocka strona liczy wszystkie ułożenia i ich skutki, podaje modelowi 5 najlepszych według klasycznej heurystyki w losowej kolejności, a model wybiera jedno. „Zgodność” mówi, jak często wybrał faworyta heurystyki.",
+    tetrisKeys: "← → ruch, ↑ lub X obrót, Z obrót wstecz, ↓ szybciej, spacja — zrzut, P — pauza.",
+    pacTitle: "Pac-Man", lives: "Życia", dotsLeft: "Zostało kropek", caught: "Duch złapał Pac-Mana.",
+    levelUp: "Poziom {n}: labirynt znowu pełny.",
+    pacKeys: "Strzałki lub WASD — sterowanie, spacja — pauza. Na telefonie: przesuń palcem po planszy albo użyj przycisków.",
+    pacModelIntro: "Steruje model. Duchy ruszają się o krok na turę, więc gra czeka na model. Przed każdym krokiem strona liczy dla każdego kierunku, jak daleko będzie najbliższy duch (po ścieżkach labiryntu), do ilu pól Pac-Man zdąży dojść przed duchami, co ruch zjada i jak daleko będzie najbliższa kropka, i zadaje modelowi jedno pytanie choice.",
+    pacAsk: "W którą stronę ma iść Pac-Man? Ruch niebezpieczny może kosztować życie; jeśli żaden nie jest bezpieczny, wybierz ten z największą liczbą wolnych pól. Spośród bezpiecznych wybierz ruch, który coś zjada, a jeśli takiego nie ma — najbliżej kropki; gdy duchy są przestraszone, złapanie ducha jest warte najwięcej.",
+    pacFields: {safe: "bezpieczny", ghost: "odległość_do_ducha", room: "wolne_pola", eats: "zjada", dot: "odległość_do_kropki", prey: "odległość_do_przestraszonego_ducha",
+                moves: "ruchy", lives: "życia", power: "tury_strachu_duchów"},
+    eat_dot: "kropkę", eat_power: "dużą kropkę", eat_ghost: "przestraszonego ducha", eat_nothing: "nic",
+    tabMetrics: "Metryki", refresh: "Odśwież", updated: "odświeżono {time}", keyNeededShort: "wymaga klucza API",
+    metricsIntro: "Bieżące liczby z GET /metrics (tekst Prometheus), odświeżane co 5 s, gdy ta zakładka jest otwarta.",
+    mRequests: "Zapytania", mQuestions: "Pytania", mRejected: "Odrzucone", mQueue: "Przebiegi w kolejce", mRate: "Zapytania/s",
+    mLatency: "Średni czas zapytania", mHistory: "Zapytania na sekundę (ostatnie 5 minut)", mTimes: "Czasy",
+    mWhat: "co", mCount: "liczba", mMean: "średnio", mBatch: "Paczkowanie",
+    mBatchLine: "{passes} przebiegów modelu w {batches} forwardach · średnio {mean} przebiegu na forward · p95 {p95}",
+    mByStatus: "Zapytania według kodu HTTP", mByReason: "Odrzucenia według powodu", mDropped: "Pominięte przez filtr odpowiedzi",
+    mOmitted: "całe odpowiedzi", mRaw: "Surowy tekst (Prometheus)",
+    histNames: {request_seconds: "całe zapytanie", forward_seconds: "jeden forward na GPU", queue_wait_seconds: "czekanie na forward"},
+    paceLine: "Model odpowiada średnio w {avg} s (p95 {p95} s); najszybsze tempo, za którym nadąża: ruch co {fastest} s.",
+    speed: "Tempo", speedValue: "{pct}% najszybszego — ruch co {period} s",
+    apiTitle: "Jak wywołać API", endpoint: "Adres", meaning: "Znaczenie",
+    apiIntro: "Wysyłasz dowody (state) i pytania z typem; dostajesz prawdopodobieństwo każdej opcji. Model nie pisze tekstu, więc każda odpowiedź jest poprawną wartością swojego typu. Odpowiada w jednym przebiegu, więc sumy, przeliczenia jednostek i rachunki na datach rób w swoim kodzie i wysyłaj wyniki razem z danymi: model dobrze porównuje i stosuje reguły, ale nie liczy.",
+    calib: "Temperatury tego modelu (według typu pytania)",
+    typesTitle: "Typy pytań", statusTitle: "Kody odpowiedzi",
+    types: [["noul", "tak/nie", "{\"type\": \"noul\", \"instructions\": \"…\"}", "noul: P(tak)"],
+            ["choice", "jedna z opcji", "{\"type\": \"choice\", \"instructions\": \"…\", \"criteria\": {\"a\": \"…\", \"b\": \"…\"}}", "choice, probabilities"],
+            ["score", "poziom na uporządkowanej skali", "{\"type\": \"score\", \"instructions\": \"…\", \"criteria\": [\"niski\", \"średni\", \"wysoki\"]}", "score (oczekiwany poziom), probabilities"]],
+    statuses: [["200", "odpowiedź"], ["400", "treść nie jest JSON-em"], ["401", "brak lub zły klucz API"], ["413", "za duża treść"],
+               ["422", "błędne zapytanie (każdy błąd jako loc + msg) albo za długi prompt"], ["503", "przeciążenie, ponów (Retry-After)"],
+               ["504", "brak odpowiedzi w czasie"], ["500", "nieoczekiwany błąd (zapisany w logu serwera)"]],
+    endpoints: [["POST v1/systemone", "decyzje (z kluczem API, jeśli jest ustawiony)"], ["GET v1/model", "model, kalibracja, limity (z kluczem API, jeśli jest ustawiony)"], ["GET health", "czy serwer działa (zawsze otwarte)"], ["GET metrics", "metryki Prometheus (z kluczem API, jeśli jest ustawiony, chyba że --public-metrics)"]],
+  },
+};
+
+const store = {
+  get(k) { try { return localStorage.getItem("sonda." + k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem("sonda." + k, v); } catch (e) { /* storage may be off */ } },
+};
+
+const S = {
+  lang: store.get("lang") === "pl" || (!store.get("lang") && (navigator.language || "").startsWith("pl")) ? "pl" : "en",
+  tab: "examples", data: null, filter: {type: "all", data: "all", domain: "all"}, current: null, search: "", health: null, sending: false,
+  code: store.get("code") || "curl", apiKey: "", modelInfo: null, game: null, gameKind: store.get("game") || "judge",
+};
+
+const $ = (id) => document.getElementById(id);
+const t = (key) => T[S.lang][key];
+
+function el(tag, attrs, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") node.className = v;
+    else if (k === "style") node.style.cssText = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of children.flat(Infinity)) {
+    if (c === null || c === undefined || c === false) continue;
+    node.append(c instanceof Node ? c : document.createTextNode(String(c)));  // text only, never HTML
+  }
+  return node;
+}
+
+function pct(p) { return (100 * p).toFixed(p > 0.995 || p < 0.005 ? 1 : 0) + "%"; }
+
+function typesOf(ex) {
+  const qs = Object.values(ex.request.en.questions);
+  return qs.length > 1 ? "several" : qs[0].type;
+}
+
+// ---------------------------------------------------------------- server calls
+
+async function call(path, body) {
+  const headers = {"Content-Type": "application/json"};
+  if (S.apiKey) headers["Authorization"] = "Bearer " + S.apiKey;
+  const started = performance.now();
+  let response;
+  try {
+    response = await fetch(path, body === undefined ? {headers} : {method: "POST", headers, body});
+  } catch (e) {
+    return {status: 0, body: {error: t("unreachable")}, ms: 0};
+  }
+  let parsed = null;
+  try { parsed = await response.json(); } catch (e) { parsed = {error: response.statusText}; }
+  if (response.status === 401) $("keybox").classList.add("show");
+  return {status: response.status, body: parsed, ms: performance.now() - started};
+}
+
+async function refreshHealth() {
+  const r = await call("health");
+  $("health-dot").className = "dot " + (r.status === 200 ? "ok" : "down");
+  S.health = r.status === 200;
+  $("health-dot").title = S.health ? t("online") : t("offline");
+  $("health-label").textContent = t(S.health ? "online" : "offline");
+  const info = await call("v1/model");
+  if (info.status !== 200) S.modelInfo = null;
+  if (info.status !== 200 && info.status !== 401) $("model-name").textContent = "";
+  if (info.status === 401) $("model-name").textContent = t("keyNeededShort");
+  if (info.status === 200) {
+    S.modelInfo = info.body;
+    $("model-name").textContent = info.body.model + " · v" + info.body.version;
+    if (S.tab === "api") renderApi();
+  }
+}
+
+// ---------------------------------------------------------------- language, theme, tabs
+
+function applyLang() {
+  document.documentElement.lang = S.lang;
+  document.querySelectorAll("[data-i18n]").forEach((n) => { n.textContent = t(n.dataset.i18n); });
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === S.lang)));
+  $("filter-toggle").textContent = t($("filter-toggle").getAttribute("aria-expanded") === "true" ? "hideFilters" : "showFilters");
+  $("example-search").placeholder = t("search");
+  $("example-search").setAttribute("aria-label", t("search"));
+  $("theme").setAttribute("aria-label", t("themeLabel"));
+  $("theme").title = t("themeLabel");
+  $("health-label").textContent = t(S.health === null ? "connecting" : S.health ? "online" : "offline");
+  renderFilters();
+  renderList();
+  if (S.current) loadExample(S.current);
+  else { $("ex-title").textContent = t("library"); renderEmptyResult(); }
+  if (S.tab === "game") { showGame(S.gameKind); for (const game of Object.values(ARCADE())) game.relang(); }
+  if (S.tab === "api") renderApi();
+  metricsView.relang();
+}
+
+function setTab(tab) {
+  S.tab = tab;
+  for (const name of ["examples", "game", "metrics", "api"]) {
+    $("view-" + name).classList.toggle("hidden", name !== tab);
+    const button = document.querySelector(`[data-tab="${name}"]`);
+    button.setAttribute("aria-selected", String(name === tab));
+    button.tabIndex = name === tab ? 0 : -1;
+  }
+  if (tab === "game") showGame(S.gameKind);
+  else for (const game of Object.values(ARCADE())) game.pause();
+  if (tab === "metrics") metricsView.start(); else metricsView.stop();
+  if (tab === "api") renderApi();
+}
+
+// ---------------------------------------------------------------- examples
+
+function filtered() {
+  return S.data.examples.filter((ex) =>
+    (S.filter.type === "all" || typesOf(ex) === S.filter.type) &&
+    (S.filter.data === "all" || ex.data === S.filter.data) &&
+    (S.filter.domain === "all" || ex.domain === S.filter.domain) &&
+    (!S.search || [ex.title[S.lang], ex.note?.[S.lang], S.data.domains[ex.domain]?.[S.lang], typesOf(ex)]
+      .some((value) => (value || "").toLocaleLowerCase(S.lang).includes(S.search.toLocaleLowerCase(S.lang)))));
+}
+
+function chips(container, key, values) {
+  container.replaceChildren(...values.map(([value, label]) => el("button", {
+    type: "button", class: "chip", "aria-pressed": String(S.filter[key] === value),
+    onclick: () => { S.filter[key] = value; renderFilters(); renderList(); },
+  }, label)));
+}
+
+function renderFilters() {
+  chips($("f-type"), "type", [["all", t("all")], ["choice", "choice"], ["noul", "noul"], ["score", "score"], ["several", t("several")]]);
+  chips($("f-data"), "data", [["all", t("all")], ["text", t("text")], ["object", t("object")], ["list", t("list")]]);
+  const sel = $("f-domain");
+  sel.replaceChildren(el("option", {value: "all"}, t("allDomains")),
+    ...Object.entries(S.data.domains).map(([k, names]) => el("option", {value: k}, names[S.lang])));
+  sel.value = S.filter.domain;
+}
+
+function exampleTags(ex) {
+  const kind = typesOf(ex);
+  return [el("span", {class: "tag"}, S.data.domains[ex.domain][S.lang]),
+          el("span", {class: "tag", "data-kind": kind}, kind === "several" ? t("several") : kind),
+          el("span", {class: "tag"}, t(ex.data))];
+}
+
+function renderList() {
+  const items = filtered();
+  const list = $("example-list");
+  $("example-count").textContent = `${items.length} / ${S.data.examples.length}`;
+  if (!items.length) { list.replaceChildren(el("div", {class: "empty"}, t(S.examplesFailed ? "examplesFailed" : "noMatch"))); return; }
+  list.replaceChildren(...items.map((ex) => el("button", {
+    type: "button", class: "card", "aria-current": String(S.current === ex.id), onclick: () => loadExample(ex.id),
+  }, el("div", {class: "t"}, ex.title[S.lang]), el("div", {class: "m"}, exampleTags(ex)))));
+}
+
+function loadExample(id, keepResult) {
+  const ex = S.data.examples.find((e) => e.id === id);
+  if (!ex) return;
+  S.current = id;
+  $("ex-title").textContent = ex.title[S.lang];
+  $("ex-meta").replaceChildren(...exampleTags(ex));
+  $("ex-note").textContent = ex.note ? ex.note[S.lang] : "";
+  $("ex-note").classList.toggle("hidden", !ex.note);
+  $("request").value = JSON.stringify(ex.request[S.lang], null, 2);
+  if (!keepResult) renderEmptyResult();
+  $("status").textContent = "";
+  try { history.replaceState(null, "", "#" + id); } catch (e) { /* file or sandbox */ }
+  renderList();
+  renderCode();
+}
+
+function renderEmptyResult(loading = false) {
+  $("result").replaceChildren(el("div", {class: "result-empty" + (loading ? " loading" : "")},
+    el("div", {class: "empty-orbit", "aria-hidden": "true"}, el("span", {}, "↗")),
+    el("strong", {}, t(loading ? "sending" : "emptyTitle")),
+    el("p", {}, t("emptyDescription")), el("div", {class: "empty-flow"}, t("emptyFlow"))));
+}
+
+function parseRequest() {
+  try { return {value: JSON.parse($("request").value)}; }
+  catch (e) { return {error: t("badJson") + ": " + e.message}; }
+}
+
+function renderCode() {
+  const parsed = parseRequest();
+  const json = parsed.error ? $("request").value : JSON.stringify(parsed.value, null, 2);
+  const url = new URL("v1/systemone", location.href).href;
+  const auth = S.apiKey || $("keybox").classList.contains("show");
+  let code;
+  if (S.code === "curl") {
+    code = `curl -s ${url} \\\n  -H 'Content-Type: application/json' \\\n` +
+      (auth ? `  -H "Authorization: Bearer $SONDA_API_KEY" \\\n` : "") +
+      `  -d @- <<'EOF'\n${json}\nEOF`;
+  } else if (S.code === "python") {
+    const py = json.replace(/\btrue\b/g, "True").replace(/\bfalse\b/g, "False").replace(/\bnull\b/g, "None");
+    code = `import requests\n${auth ? "import os\n" : ""}\nrequest = ${py}\n\nresponse = requests.post(\n    "${url}",\n    json=request,\n` +
+      (auth ? `    headers={"Authorization": f"Bearer {os.environ['SONDA_API_KEY']}"},\n` : "") +
+      `    timeout=60,\n)\nresponse.raise_for_status()\nfor qid, answer in response.json()["answers"].items():\n    print(qid, answer)`;
+  } else {
+    code = `const request = ${json};\n\nconst response = await fetch("${url}", {\n  method: "POST",\n  headers: {"Content-Type": "application/json"` +
+      (auth ? `, "Authorization": \`Bearer \${process.env.SONDA_API_KEY}\`` : "") +
+      `},\n  body: JSON.stringify(request),\n});\nconst {answers} = await response.json();\nconsole.log(answers);`;
+  }
+  $("code").textContent = code;
+  document.querySelectorAll("[data-code]").forEach((b) => {
+    b.setAttribute("aria-selected", String(b.dataset.code === S.code));
+    b.tabIndex = b.dataset.code === S.code ? 0 : -1;
+    b.id = "code-tab-" + b.dataset.code;
+  });
+  $("code").setAttribute("aria-labelledby", "code-tab-" + S.code);
+}
+
+function optionLabels(question) {
+  // [id, label] in display order, as the server builds them
+  if (question.type === "noul") return [["true", t("yes")], ["false", t("no")]];
+  if (question.type === "score") return (question.criteria || []).map((c, i) => [String(i), typeof c === "string" ? c : JSON.stringify(c)]);
+  const crit = question.criteria || {};
+  if (Array.isArray(crit)) return crit.map((c) => [c, c]);
+  return Object.entries(crit).map(([k, v]) => [k, v === null || v === undefined ? k : (typeof v === "string" ? v : JSON.stringify(v))]);
+}
+
+function distribution(question, answer) {
+  if (!answer) return null;
+  if (answer.type === "noul" && typeof answer.noul === "number") return {"true": answer.noul, "false": 1 - answer.noul};
+  return answer.probabilities || null;
+}
+
+function bars(question, probs, truth) {
+  const labels = optionLabels(question);
+  let top = null;
+  for (const [id] of labels) if (top === null || (probs[id] || 0) > (probs[top] || 0)) top = id;
+  const shown = labels.length > 12 ? labels.slice().sort((a, b) => (probs[b[0]] || 0) - (probs[a[0]] || 0)).slice(0, 8) : labels;
+  return el("div", {class: "bars"}, shown.map(([id, label]) => {
+    const p = probs[id] || 0;
+    const cls = "fill" + (truth !== undefined && id === truth ? " truth" : id === top ? " top" : "");
+    const name = question.type === "choice" && id !== label ? `${id}: ${label}` : label;
+    return [el("div", {class: "lab", title: name}, name),
+            el("div", {class: "track"}, el("div", {class: cls, style: `width:${(100 * p).toFixed(1)}%`})),
+            el("div", {class: "val"}, pct(p))];
+  }));
+}
+
+function answerCard(qid, question, answer) {
+  const head = el("div", {class: "head"}, el("span", {class: "qid"}, qid), el("span", {class: "tag"}, question ? question.type : "?"));
+  const card = el("div", {class: "answer"}, head);
+  if (!question) { card.append(el("pre", {}, JSON.stringify(answer, null, 2))); return card; }
+  if (typeof question.instructions === "string") card.append(el("div", {class: "muted small"}, question.instructions));
+  const probs = distribution(question, answer) || {};
+  if (answer.type === "noul") {
+    head.append(el("span", {class: "big"}, `${t("pYes")} = ${answer.noul.toFixed(3)}`));
+  } else if (answer.type === "choice") {
+    const label = optionLabels(question).find(([id]) => id === answer.choice);
+    head.append(el("span", {class: "big"}, label && label[1] !== answer.choice ? `${answer.choice}: ${label[1]}` : answer.choice));
+  } else if (answer.type === "score") {
+    head.append(el("span", {class: "big"}, answer.score.toFixed(2)), el("span", {class: "muted small"}, t("expectedLevel")));
+  }
+  card.append(bars(question, probs));
+  return card;
+}
+
+async function send() {
+  if (S.sending) return;
+  const parsed = parseRequest();
+  const result = $("result");
+  if (parsed.error) { result.replaceChildren(el("div", {class: "error"}, parsed.error)); return; }
+  S.sending = true;
+  const sentExample = S.current, sentLanguage = S.lang;
+  const sentRequest = $("request").value;
+  const rawOpen = Boolean(result.querySelector("details[open]"));
+  $("send").disabled = true;
+  result.setAttribute("aria-busy", "true");
+  renderEmptyResult(true);
+  $("status").textContent = t("sending");
+  const r = await call("v1/systemone", JSON.stringify(parsed.value));
+  S.sending = false;
+  $("send").disabled = false;
+  result.setAttribute("aria-busy", "false");
+  if (S.current !== sentExample || S.lang !== sentLanguage || $("request").value !== sentRequest) {
+    $("status").textContent = "";
+    renderEmptyResult();
+    return;
+  }
+  $("status").textContent = `${t("http")} ${r.status || "—"} · ${Math.round(r.ms)} ms`;
+  if (r.status !== 200) {
+    const box = el("div", {class: "error"}, el("b", {}, `${t("http")} ${r.status || "—"}: `), (r.body && r.body.error) || "");
+    if (r.status === 401) box.append(el("div", {}, t("needKey")));
+    if (r.body && Array.isArray(r.body.errors)) box.append(el("ul", {}, r.body.errors.map((e) => el("li", {}, el("code", {}, e.loc), " — ", e.msg))));
+    result.replaceChildren(box);
+    return;
+  }
+  const body = r.body;
+  const questions = (parsed.value && parsed.value.questions) || {};
+  const meta = el("div", {class: "muted small"},
+    `${t("latency")} ${body.latency_ms} ms · ${t("tokens")} ${body.usage ? body.usage.input_tokens : "?"}`);
+  const cards = Object.entries(body.answers || {}).map(([qid, answer]) => answerCard(qid, questions[qid], answer));
+  const omitted = body.omitted ? el("div", {class: "error"}, `${t("omitted")}: ${body.omitted.join(", ")}`) : null;
+  result.replaceChildren(...[meta, el("div", {class: "answers"}, cards), omitted,
+    el("details", {open: rawOpen}, el("summary", {}, t("rawJson")), el("pre", {}, JSON.stringify(body, null, 2)))].filter(Boolean));
+}
+
+// ---------------------------------------------------------------- game
+
+function shuffle(items) {
+  const a = items.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function gameCases(domain) {
+  const cases = [];
+  for (const ex of S.data.examples) {
+    if (domain !== "all" && ex.domain !== domain) continue;
+    for (const [qid, truth] of Object.entries(ex.expected || {})) cases.push({ex, qid, truth});
+  }
+  return shuffle(cases).slice(0, 10);
+}
+
+// Points of one round: 100 x (1 - Brier / 2), Brier over every option (0 = sure and right, 2 = sure and wrong).
+function points(probs, ids, truth) {
+  let brier = 0;
+  for (const id of ids) brier += ((probs[id] || 0) - (id === truth ? 1 : 0)) ** 2;
+  return Math.round(100 * (1 - brier / 2));
+}
+
+function playerProbs(ids, pick, confidence) {
+  const rest = ids.length > 1 ? (1 - confidence) / (ids.length - 1) : 0;
+  return Object.fromEntries(ids.map((id) => [id, id === pick ? confidence : rest]));
+}
+
+function startGame(domain) {
+  S.game = {domain, cases: gameCases(domain), at: 0, you: 0, model: 0, pick: null, confidence: null, reveal: null};
+  renderGame();
+}
+
+function renderScore() {
+  const g = S.game;
+  $("g-you").textContent = g ? g.you : 0;
+  $("g-model").textContent = g ? g.model : 0;
+  $("g-round").textContent = g && g.cases.length ? `${Math.min(g.at + 1, g.cases.length)} / ${g.cases.length}` : "–";
+}
+
+function renderGame() {
+  const panel = $("g-panel");
+  const g = S.game;
+  renderScore();
+  if (!g) {
+    const sel = el("select", {id: "g-domain"}, el("option", {value: "all"}, t("allDomains")),
+      ...Object.entries(S.data.domains).map(([k, names]) => el("option", {value: k}, names[S.lang])));
+    panel.replaceChildren(el("h2", {}, t("gameTitle")), el("p", {class: "muted"}, t("gameIntro")),
+      el("div", {class: "row"}, el("label", {for: "g-domain", class: "small muted"}, t("gameDomain")), sel,
+        el("button", {type: "button", class: "btn primary", onclick: () => startGame(sel.value)}, t("start"))));
+    return;
+  }
+  if (!g.cases.length) {
+    panel.replaceChildren(el("p", {}, t("noCases")), el("button", {type: "button", class: "btn", onclick: () => { S.game = null; renderGame(); }}, t("again")));
+    return;
+  }
+  if (g.at >= g.cases.length) {
+    const verdict = g.you > g.model ? t("youWin") : g.you < g.model ? t("modelWins") : t("tie");
+    panel.replaceChildren(el("h2", {}, t("final")), el("div", {class: "verdict"}, verdict),
+      el("p", {}, `${t("you")}: ${g.you} · ${t("model")}: ${g.model}`),
+      el("button", {type: "button", class: "btn primary", onclick: () => startGame(g.domain)}, t("again")));
+    return;
+  }
+  const {ex, qid, truth} = g.cases[g.at];
+  const req = ex.request[S.lang];
+  const question = req.questions[qid];
+  const labels = optionLabels(question);
+  const ids = labels.map(([id]) => id);
+  const floor = Math.ceil(100 / ids.length);
+  if (g.confidence === null) g.confidence = Math.max(floor, 70);
+  const stateText = typeof req.state === "string" ? req.state : JSON.stringify(req.state, null, 2);
+  const parts = [el("div", {class: "muted small"}, S.data.domains[ex.domain][S.lang]),
+                 el("div", {class: "state-box"}, stateText),
+                 el("h2", {}, typeof question.instructions === "string" ? question.instructions : JSON.stringify(question.instructions))];
+
+  const options = el("div", {class: "options"}, labels.map(([id, label]) => {
+    let cls = "opt";
+    if (g.reveal) cls += id === truth ? " right" : id === g.pick ? " wrong" : "";
+    return el("button", {type: "button", class: cls, "aria-pressed": String(g.pick === id), disabled: Boolean(g.reveal),
+      onclick: () => { g.pick = id; renderGame(); }}, label);
+  }));
+  parts.push(el("h3", {}, t("yourAnswer")), options);
+
+  if (!g.reveal) {
+    const value = el("b", {}, g.confidence + "%");
+    const range = el("input", {type: "range", min: String(floor), max: "99", value: String(g.confidence),
+      "aria-label": t("confidence"), oninput: (e) => { g.confidence = Number(e.target.value); value.textContent = g.confidence + "%"; }});
+    parts.push(el("div", {class: "row"}, el("span", {class: "small muted"}, t("confidence")), value), range,
+      el("div", {class: "row"},
+        el("button", {type: "button", class: "btn primary", disabled: g.pick === null, onclick: () => checkRound(question, ids, truth, req.state, qid)}, t("check")),
+        el("button", {type: "button", class: "btn", onclick: () => nextRound()}, t("skip")),
+        el("span", {class: "small muted", id: "g-status"})));
+  } else {
+    const r = g.reveal;
+    const truthLabel = labels.find(([id]) => id === truth);
+    parts.push(el("p", {}, `${t("correct")}: `, el("b", {}, truthLabel ? truthLabel[1] : truth)));
+    if (r.error) {
+      parts.push(el("div", {class: "error"}, r.error));
+    } else {
+      parts.push(el("div", {class: "versus"},
+        el("div", {class: "panel"}, el("div", {class: "muted small"}, t("you")), el("div", {class: "big"}, `+${r.you}`),
+          el("div", {class: "small muted"}, t("roundPoints"))),
+        el("div", {class: "panel"}, el("div", {class: "muted small"}, t("model")), el("div", {class: "big"}, `+${r.model}`),
+          el("div", {class: "small muted"}, t("roundPoints")))),
+        el("h3", {}, t("modelThinks")), bars(question, r.probs, truth));
+    }
+    parts.push(el("div", {class: "row"}, el("button", {type: "button", class: "btn primary", onclick: () => nextRound()}, t("next"))));
+  }
+  panel.replaceChildren(...parts);
+}
+
+async function checkRound(question, ids, truth, state, qid) {
+  const g = S.game;
+  const mine = playerProbs(ids, g.pick, g.confidence / 100);
+  const status = $("g-status");
+  if (status) status.textContent = t("sending");
+  const r = await call("v1/systemone", JSON.stringify({state, questions: {[qid]: question}}));
+  const answer = r.status === 200 && r.body.answers ? r.body.answers[qid] : null;
+  const probs = distribution(question, answer);
+  const you = points(mine, ids, truth);
+  if (!probs) {
+    let msg = `${t("http")} ${r.status || "—"}: ${(r.body && r.body.error) || t("unreachable")}`;
+    if (r.status === 401) msg += " " + t("needKey");
+    g.reveal = {error: msg, you};
+    g.you += you;
+  } else {
+    const model = points(probs, ids, truth);
+    g.reveal = {probs, you, model};
+    g.you += you;
+    g.model += model;
+  }
+  renderGame();
+}
+
+function nextRound() {
+  const g = S.game;
+  g.at += 1;
+  g.pick = null;
+  g.confidence = null;
+  g.reveal = null;
+  renderGame();
+}
+
+// ---------------------------------------------------------------- arcade games: shared
+
+const GAMES = ["judge", "snake", "tetris", "pacman"];
+const ARCADE = () => ({snake, tetris, pacman});  // the games with a board, by name
+
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function fmt(text, values) { return text.replace(/\{(\w+)\}/g, (m, k) => (k in values ? values[k] : m)); }
+
+function fitCanvas(canvas, width, height) {
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = Math.round(width * ratio);
+  canvas.height = Math.round(height * ratio);
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  return ctx;
+}
+
+function block(ctx, x, y, size, color, radius) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, size, size, radius); else ctx.rect(x, y, size, size);
+  ctx.fill();
+}
+
+function banner(ctx, width, height, text) {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+  ctx.fillRect(0, height / 2 - 28, width, 56);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "600 17px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, width / 2, height / 2);
+}
+
+function bestScore(game, score) {
+  const key = "best." + game;
+  const old = Number(store.get(key)) || 0;
+  if (score !== undefined && score > old) { store.set(key, String(score)); return score; }
+  return old;
+}
+
+function stat(label, value, id) {
+  return el("div", {}, el("div", {class: "muted small"}, label), el("div", {class: "big", id}, String(value)));
+}
+
+function pad(buttons) {  // 3 x n grid of [label, name, action] or null
+  return el("div", {class: "pad"}, buttons.map((b) => (b
+    ? el("button", {type: "button", class: "btn", "aria-label": b[1], onclick: (e) => { e.currentTarget.blur(); b[2](); }}, b[0])
+    : el("span", {}))));
+}
+
+function boardWidth(maxWidth) {
+  const box = $("view-game").querySelector(".game").clientWidth || 360;
+  return Math.max(200, Math.min(maxWidth, (window.innerWidth < 861 ? box : box - 280) - 22));
+}
+
+function showGame(kind) {
+  S.gameKind = GAMES.includes(kind) ? kind : "judge";
+  store.set("game", S.gameKind);
+  for (const g of GAMES) {
+    $("game-" + g).classList.toggle("hidden", g !== S.gameKind);
+    document.querySelector(`[data-game="${g}"]`).setAttribute("aria-pressed", String(g === S.gameKind));
+  }
+  for (const [name, game] of Object.entries(ARCADE())) if (name !== S.gameKind) game.pause();
+  if (S.gameKind === "judge") renderGame(); else ARCADE()[S.gameKind].show();
+}
+
+// ---------------------------------------------------------------- model players: shared
+
+function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
+
+function callError(r) {
+  let msg = `${t("http")} ${r.status || "—"}: ${(r.body && r.body.error) || t("unreachable")}`;
+  if (r.status === 401) msg += " " + t("needKey");
+  return fmt(t("modelError"), {msg});
+}
+
+// The model's last decision: its probabilities over the options and the request that asked for them. Built once per
+// game and filled in after every move, so an opened "request" stays open (and keeps its scroll) while the game runs.
+function makeDecisionBox() {
+  const head = el("h3", {}), time = el("div", {class: "small muted"}), chart = el("div", {});
+  const summary = el("summary", {}), request = el("pre", {});
+  const node = el("div", {class: "hidden"}, head, time, chart, el("details", {}, summary, request));
+  return {
+    node,
+    update(last, visible) {
+      head.textContent = t("lastDecision");
+      summary.textContent = t("requestShown");
+      node.classList.toggle("hidden", !visible || !last);
+      if (!last) return;
+      time.textContent = `${Math.round(last.ms)} ms`;
+      chart.replaceChildren(wrapped(bars(Object.values(last.request.questions)[0], last.answer.probabilities)));
+      request.textContent = JSON.stringify(last.request, null, 2);
+    },
+  };
+}
+
+// An even game pace that follows the model's answer time: a little slower than its moving average.
+// The slider only slows the game down: 100% is the fastest pace the model keeps up with, so a fast machine can be
+// watched comfortably and no setting asks for moves faster than the model answers.
+function makePacer(minMs, key) {
+  const recent = [];
+  let ema = null;
+  let speed = Math.min(100, Math.max(10, Number(store.get(key)) || 100));
+  const value = el("span", {});
+  const input = el("input", {type: "range", min: "10", max: "100", step: "5", value: String(speed),
+    oninput: (e) => { speed = Number(e.target.value); store.set(key, String(speed)); pacer.relabel(); }});
+  const pacer = {
+    control: el("div", {class: "speed"}, el("div", {class: "row small"}, el("b", {"data-i18n": "speed"}, t("speed")), value), input),
+    add(ms) {
+      ema = ema === null ? ms : 0.7 * ema + 0.3 * ms;
+      recent.push(ms);
+      if (recent.length > 40) recent.shift();
+    },
+    fastest() { return Math.max(minMs, ema === null ? minMs : ema * 1.15); },
+    period() { return this.fastest() * 100 / speed; },
+    relabel() {
+      input.setAttribute("aria-label", t("speed"));
+      value.textContent = fmt(t("speedValue"), {pct: speed, period: (this.period() / 1000).toFixed(2)});
+    },
+    view() {
+      if (ema === null) return null;
+      const sorted = recent.slice().sort((a, b) => a - b);
+      const p95 = sorted[Math.min(sorted.length - 1, Math.floor(0.95 * sorted.length))];
+      return el("div", {class: "small muted"}, fmt(t("paceLine"),
+        {avg: (ema / 1000).toFixed(2), p95: (p95 / 1000).toFixed(2), fastest: (this.fastest() / 1000).toFixed(2)}));
+    },
+  };
+  pacer.relabel();
+  return pacer;
+}
+
+function wrapped(node) { node.classList.add("wrap"); return node; }  // long option texts in full
+
+function modeButtons(modes, current, onPick) {
+  return el("div", {class: "seg", role: "group"}, modes.map(([m, label]) => el("button", {
+    type: "button", "aria-pressed": String(current === m), onclick: () => onPick(m)}, label)));
+}
+
+// ---------------------------------------------------------------- snake
+
+const snake = (() => {
+  const N = 16;
+  const DIRS = {up: {x: 0, y: -1}, down: {x: 0, y: 1}, left: {x: -1, y: 0}, right: {x: 1, y: 0}};
+  let g = null, timer = null, cell = 24, ctx = null, touch = null, epoch = 0, topBox = null, bottomBox = null;
+  const pace = makePacer(150, "snake.speed"), decision = makeDecisionBox();
+  let mode = ["you", "model", "model_raw"].includes(store.get("snake.mode")) ? store.get("snake.mode") : "model";
+
+  function freeCell() {
+    for (;;) {
+      const p = {x: Math.floor(Math.random() * N), y: Math.floor(Math.random() * N)};
+      if (!g.body.some((b) => b.x === p.x && b.y === p.y)) return p;
+    }
+  }
+
+  function reset() {
+    const mid = N / 2;
+    g = {body: [{x: mid, y: mid}, {x: mid - 1, y: mid}, {x: mid - 2, y: mid}], dir: DIRS.right, queue: [],
+         score: 0, steps: 0, alive: true, running: false, grow: 0, token: -1, last: null, note: ""};
+    g.food = freeCell();
+  }
+
+  function dirName(d) { return Object.keys(DIRS).find((k) => DIRS[k].x === d.x && DIRS[k].y === d.y); }
+
+  // Reachable empty cells from (x, y) when `blocked` cells are taken: how much room a move leaves.
+  function room(x, y, blocked) {
+    const taken = new Set(blocked.map((b) => b.x + "," + b.y));
+    const seen = new Set([x + "," + y]);
+    const todo = [[x, y]];
+    while (todo.length) {
+      const [cx, cy] = todo.pop();
+      for (const d of Object.values(DIRS)) {
+        const nx = cx + d.x, ny = cy + d.y, key = nx + "," + ny;
+        if (nx < 0 || ny < 0 || nx >= N || ny >= N || taken.has(key) || seen.has(key)) continue;
+        seen.add(key);
+        todo.push([nx, ny]);
+      }
+    }
+    return seen.size;
+  }
+
+  // What each direction would do: computed here, so the model only compares (code computes, the model decides).
+  function analyse(name) {
+    const d = DIRS[name], head = g.body[0];
+    const nx = head.x + d.x, ny = head.y + d.y;
+    const eats = nx === g.food.x && ny === g.food.y;
+    const body = eats ? g.body : g.body.slice(0, -1);  // the tail moves away unless the snake grows
+    const safe = nx >= 0 && ny >= 0 && nx < N && ny < N && !body.some((b) => b.x === nx && b.y === ny);
+    if (!safe) return {safe: false};
+    return {safe: true, eats, distance: Math.abs(g.food.x - nx) + Math.abs(g.food.y - ny),
+            room: room(nx, ny, [{x: nx, y: ny}, ...body])};
+  }
+
+  function legal() {  // turning back into the neck is not a move
+    return Object.keys(DIRS).filter((k) => !(DIRS[k].x === -g.dir.x && DIRS[k].y === -g.dir.y));
+  }
+
+  function moveCriteria() {
+    return Object.fromEntries(legal().map((k) => [k, t("dir_" + k)]));
+  }
+
+  function featureRequest() {
+    const f = T[S.lang].snakeFields;
+    const moves = Object.fromEntries(legal().map((k) => {
+      const a = analyse(k);
+      return [k, a.safe ? {[f.safe]: true, [f.eats]: a.eats, [f.distance]: a.distance, [f.room]: a.room} : {[f.safe]: false}];
+    }));
+    return {state: {[f.length]: g.body.length, [f.moves]: moves},
+            questions: {move: {type: "choice", instructions: t("snakeAsk"), criteria: moveCriteria()}}};
+  }
+
+  function boardRequest() {
+    const rows = [];
+    for (let y = 0; y < N; y++) {
+      let row = "";
+      for (let x = 0; x < N; x++) {
+        const i = g.body.findIndex((b) => b.x === x && b.y === y);
+        row += i === 0 ? "H" : i > 0 ? "o" : g.food.x === x && g.food.y === y ? "F" : ".";
+      }
+      rows.push(row);
+    }
+    const f = T[S.lang].snakeFields;
+    return {state: {[f.legend]: t("snakeLegend"), [f.board]: rows, [f.direction]: t("dir_" + dirName(g.dir))},
+            questions: {move: {type: "choice", instructions: t("snakeAskRaw"), criteria: moveCriteria()}}};
+  }
+
+  function over(reason) {
+    g.alive = false;
+    g.running = false;
+    g.note = reason;
+    bestScore("snake-" + mode, g.score);
+  }
+
+  function step() {
+    if (g.queue.length) g.dir = g.queue.shift();
+    const head = {x: g.body[0].x + g.dir.x, y: g.body[0].y + g.dir.y};
+    const tail = g.grow > 0 ? g.body.length : g.body.length - 1;
+    if (head.x < 0 || head.y < 0 || head.x >= N || head.y >= N) return over(t("hitWall"));
+    if (g.body.some((b, i) => i < tail && b.x === head.x && b.y === head.y)) return over(t("hitSelf"));
+    g.body.unshift(head);
+    g.steps += 1;
+    if (head.x === g.food.x && head.y === g.food.y) {
+      g.score += 10;
+      g.grow += 1;
+      g.food = freeCell();
+    }
+    if (g.grow > 0) g.grow -= 1; else g.body.pop();
+  }
+
+  function tick() {  // the player's game
+    timer = null;
+    if (!g.running) return;
+    step();
+    draw();
+    side();
+    if (g.running) timer = setTimeout(tick, Math.max(70, 160 - g.body.length * 3));
+  }
+
+  async function modelPlays(token) {
+    while (g.running && g.token === token) {
+      const request = mode === "model" ? featureRequest() : boardRequest();
+      const started = performance.now();
+      const r = await call("v1/systemone", JSON.stringify(request));
+      if (!g.running || g.token !== token) return;  // paused or restarted meanwhile
+      const answer = r.status === 200 && r.body.answers ? r.body.answers.move : null;
+      if (!answer || !DIRS[answer.choice]) {
+        g.running = false;
+        g.note = callError(r);
+        break;
+      }
+      g.last = {request, answer, ms: performance.now() - started};
+      pace.add(g.last.ms);
+      g.dir = DIRS[answer.choice];
+      step();
+      draw();
+      side();
+      await sleep(Math.max(0, pace.period() - (performance.now() - started)));
+    }
+    draw();
+    side();
+  }
+
+  function toggle() {
+    if (!g.alive) reset();
+    g.running = !g.running;
+    g.token = ++epoch;
+    if (g.running) {
+      g.note = "";
+      if (mode === "you") { if (!timer) timer = setTimeout(tick, 120); } else modelPlays(g.token);
+    }
+    draw();
+    side();
+  }
+
+  function turn(x, y) {
+    if (mode !== "you") return;
+    const last = g.queue.length ? g.queue[g.queue.length - 1] : g.dir;
+    if (!(x === -last.x && y === -last.y) && !(x === last.x && y === last.y) && g.queue.length < 2) g.queue.push({x, y});
+    if (!g.running) toggle();
+  }
+
+  function draw() {
+    const size = cell * N;
+    ctx.fillStyle = cssVar("--code");
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = cssVar("--line");
+    for (let x = 0; x < N; x++) for (let y = x % 2; y < N; y += 2) ctx.fillRect(x * cell + cell / 2 - 1, y * cell + cell / 2 - 1, 2, 2);
+    ctx.fillStyle = cssVar("--bad");
+    ctx.beginPath();
+    ctx.arc(g.food.x * cell + cell / 2, g.food.y * cell + cell / 2, cell * 0.38, 0, 2 * Math.PI);
+    ctx.fill();
+    g.body.forEach((b, i) => block(ctx, b.x * cell + 1, b.y * cell + 1, cell - 2, i === 0 ? cssVar("--ink") : cssVar("--accent"), 4));
+    if (!g.alive) banner(ctx, size, size, `${t("gameOver")} · ${g.score}`);
+    else if (!g.running) banner(ctx, size, size, g.steps ? t("paused") : mode === "you" ? t("pressStart") : t("modelStart"));
+  }
+
+  function setMode(m) {
+    if (g) { g.running = false; g.token = ++epoch; }
+    if (timer) { clearTimeout(timer); timer = null; }
+    mode = m;
+    store.set("snake.mode", m);
+    reset();
+    show();
+  }
+
+  function side() {
+    const parts = [el("h2", {}, t("snakeTitle")),
+      modeButtons([["you", t("modeYou")], ["model", t("modeModel")], ["model_raw", t("modeModelRaw")]], mode, setMode),
+      el("div", {class: "stats"}, stat(t("points"), g.score), stat(t("length"), g.body.length),
+        mode === "you" ? stat(t("best"), bestScore("snake-" + mode)) : stat(t("moves"), g.steps)),
+      el("p", {class: "small muted"}, t(mode === "you" ? "snakeKeys" : mode === "model" ? "snakeModelIntro" : "snakeRawIntro"))];
+    if (mode !== "you" && pace.view()) parts.push(pace.view());
+    const below = [];
+    if (g.note) below.push(el("div", {class: "note ko"}, g.note));
+    below.push(el("div", {class: "row"}, el("button", {type: "button", class: "btn primary", onclick: toggle},
+      g.running ? t("pause") : !g.alive ? t("again") : g.steps ? t("resume") : mode === "you" ? t("play") : t("letModelPlay"))));
+    if (!topBox) { topBox = el("div", {}); bottomBox = el("div", {}); $("snake-side").replaceChildren(topBox, pace.control, bottomBox, decision.node); }
+    decision.update(g.last, mode !== "you");
+    topBox.replaceChildren(...parts);
+    bottomBox.replaceChildren(...below);
+    pace.control.classList.toggle("hidden", mode === "you");
+    pace.relabel();
+    $("snake-pad").classList.toggle("hidden", mode !== "you");
+  }
+
+  function show() {
+    cell = Math.floor(boardWidth(440) / N);
+    ctx = fitCanvas($("snake-canvas"), cell * N, cell * N);
+    if (!g) {
+      reset();
+      $("snake-pad").replaceChildren(pad([null, ["▲", "up", () => turn(0, -1)], null,
+        ["◀", "left", () => turn(-1, 0)], ["▼", "down", () => turn(0, 1)], ["▶", "right", () => turn(1, 0)]]));
+      const c = $("snake-canvas");
+      c.addEventListener("pointerdown", (e) => { touch = {x: e.clientX, y: e.clientY}; });
+      c.addEventListener("pointerup", (e) => {
+        if (!touch) return;
+        const dx = e.clientX - touch.x, dy = e.clientY - touch.y;
+        touch = null;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return toggle();
+        if (Math.abs(dx) > Math.abs(dy)) turn(Math.sign(dx), 0); else turn(0, Math.sign(dy));
+      });
+    }
+    draw();
+    side();
+  }
+
+  function key(e) {
+    const dirs = {ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0]};
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (k === " " || k === "p") { toggle(); return true; }
+    if (dirs[k] && mode === "you") { turn(...dirs[k]); return true; }
+    return false;
+  }
+
+  function pause() { if (g && g.running) toggle(); }
+
+  return {show, key, pause, relang: () => g && side()};
+})();
+
+// ---------------------------------------------------------------- tetris
+
+const tetris = (() => {
+  const COLS = 10, ROWS = 20;
+  const SHAPES = {
+    I: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], O: [[1, 1], [1, 1]],
+    T: [[0, 1, 0], [1, 1, 1], [0, 0, 0]], S: [[0, 1, 1], [1, 1, 0], [0, 0, 0]], Z: [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
+    J: [[1, 0, 0], [1, 1, 1], [0, 0, 0]], L: [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
+  };
+  const COLORS = {I: "#35b5d8", O: "#e2b33c", T: "#9a68d6", S: "#45b06a", Z: "#d9534f", J: "#3f6fd8", L: "#e0873a"};
+  const LINE_POINTS = [0, 100, 300, 500, 800];
+  // Placements offered to the model per piece. Measured on 2 x 60 pieces: with the 5 best the model clears as many
+  // lines as the heuristic (22 and 21 vs 21 and 22); with 8 the weaker extras cost it 4-5 lines and leave holes.
+  const SHOWN = 5;
+  let g = null, cell = 24, ctx = null, nextCtx = null, raf = null, last = 0, epoch = 0, topBox = null, bottomBox = null;
+  const pace = makePacer(400, "tetris.speed"), decision = makeDecisionBox();
+  let mode = store.get("tetris.mode") === "you" ? "you" : "model";
+  const nextCanvas = el("canvas", {id: "tetris-next", "aria-label": "next"});
+
+  function turned(m, dir) {
+    return dir > 0 ? m[0].map((_, c) => m.map((row) => row[c]).reverse())
+                   : m[0].map((_, c) => m.map((row) => row[row.length - 1 - c]));
+  }
+
+  function piece(kind) {
+    const m = SHAPES[kind].map((r) => r.slice());
+    return {kind, m, x: Math.floor((COLS - m[0].length) / 2), y: kind === "I" ? -1 : 0};
+  }
+
+  function take() {
+    while (g.queue.length < 2) g.queue.push(...shuffle(Object.keys(SHAPES)));
+    return piece(g.queue.shift());
+  }
+
+  function collide(m, x, y, board = g.board) {
+    for (let r = 0; r < m.length; r++) for (let c = 0; c < m[r].length; c++) {
+      if (!m[r][c]) continue;
+      const nx = x + c, ny = y + r;
+      if (nx < 0 || nx >= COLS || ny >= ROWS) return true;
+      if (ny >= 0 && board[ny][nx]) return true;
+    }
+    return false;
+  }
+
+  function reset() {
+    g = {board: Array.from({length: ROWS}, () => Array(COLS).fill(null)), queue: [], score: 0, lines: 0, level: 1,
+         alive: true, running: false, acc: 0, token: -1, pieces: 0, agree: 0, last: null, target: null, note: ""};
+    g.piece = take();
+  }
+
+  function interval() { return Math.max(70, 800 * Math.pow(0.85, g.level - 1)); }
+
+  function stats() {
+    const ids = {"tetris-score": g.score, "tetris-lines": g.lines, "tetris-level": g.level};
+    for (const [id, v] of Object.entries(ids)) { const n = $(id); if (n) n.textContent = v; }
+  }
+
+  function gameOver() {
+    g.alive = false;
+    g.running = false;
+    bestScore("tetris-" + mode, g.score);
+    side();
+  }
+
+  function lock() {
+    const p = g.piece;
+    let above = false;
+    p.m.forEach((row, r) => row.forEach((v, c) => {
+      if (!v) return;
+      if (p.y + r < 0) above = true; else g.board[p.y + r][p.x + c] = COLORS[p.kind];
+    }));
+    const kept = g.board.filter((row) => row.some((v) => !v));
+    const cleared = ROWS - kept.length;
+    while (kept.length < ROWS) kept.unshift(Array(COLS).fill(null));
+    g.board = kept;
+    if (cleared) {
+      g.score += LINE_POINTS[cleared] * g.level;
+      g.lines += cleared;
+      g.level = 1 + Math.floor(g.lines / 10);
+    }
+    g.pieces += 1;
+    g.piece = take();
+    if (above || collide(g.piece.m, g.piece.x, g.piece.y)) gameOver();
+    stats();
+    drawNext();
+  }
+
+  // ---- the player's moves
+  function move(dx) { if (!collide(g.piece.m, g.piece.x + dx, g.piece.y)) g.piece.x += dx; }
+
+  function down(points) {
+    if (!collide(g.piece.m, g.piece.x, g.piece.y + 1)) { g.piece.y += 1; g.score += points; stats(); }
+    else lock();
+    g.acc = 0;
+  }
+
+  function drop() {
+    while (!collide(g.piece.m, g.piece.x, g.piece.y + 1)) { g.piece.y += 1; g.score += 2; }
+    lock();
+    g.acc = 0;
+  }
+
+  function rotate(dir) {
+    const m = turned(g.piece.m, dir);
+    for (const [kx, ky] of [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [0, -1]]) {
+      if (!collide(m, g.piece.x + kx, g.piece.y + ky)) { g.piece.m = m; g.piece.x += kx; g.piece.y += ky; return; }
+    }
+  }
+
+  // ---- the model's moves: every placement, its effect computed here; the model picks one
+  function heights(board) {
+    return Array.from({length: COLS}, (_, x) => { const y = board.findIndex((row) => row[x]); return y < 0 ? 0 : ROWS - y; });
+  }
+
+  function holes(board) {
+    let n = 0;
+    for (let x = 0; x < COLS; x++) {
+      let roof = false;
+      for (let y = 0; y < ROWS; y++) { if (board[y][x]) roof = true; else if (roof) n += 1; }
+    }
+    return n;
+  }
+
+  function placements() {
+    const before = holes(g.board);
+    const out = [], seen = new Set();
+    let m = g.piece.m;
+    for (let rot = 0; rot < 4; rot++) {
+      for (let x = -3; x < COLS; x++) {
+        if (collide(m, x, g.piece.y)) continue;
+        let y = g.piece.y;
+        while (!collide(m, x, y + 1)) y += 1;
+        const board = g.board.map((row) => row.slice());
+        let above = false;
+        m.forEach((row, r) => row.forEach((v, c) => { if (v) { if (y + r < 0) above = true; else board[y + r][x + c] = 1; } }));
+        if (above) continue;
+        const kept = board.filter((row) => row.some((v) => !v));
+        const lines = ROWS - kept.length;
+        while (kept.length < ROWS) kept.unshift(Array(COLS).fill(null));
+        const key = kept.map((row) => row.map((v) => (v ? 1 : 0)).join("")).join("");
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const h = heights(kept);
+        const newHoles = Math.max(0, holes(kept) - before);
+        const bumpiness = h.slice(1).reduce((s, v, i) => s + Math.abs(v - h[i]), 0);
+        const height = Math.max(...h);
+        // the classic hand-tuned evaluation, only to choose which placements the model sees
+        const value = -0.51 * h.reduce((s, v) => s + v, 0) + 0.76 * lines - 0.36 * holes(kept) - 0.18 * bumpiness;
+        out.push({m, x, y, lines, newHoles, height, bumpiness, value});
+      }
+      m = turned(m, 1);
+    }
+    return out;
+  }
+
+  function modelRequest(shown) {
+    const f = T[S.lang].tetrisFields;
+    const criteria = Object.fromEntries(shown.map((p, i) => [String.fromCharCode(97 + i),
+      fmt(t("placement"), {lines: p.lines, holes: p.newHoles, height: p.height, bumps: p.bumpiness})]));
+    return {state: {[f.piece]: g.piece.kind, [f.heights]: heights(g.board), [f.holes]: holes(g.board)},
+            questions: {place: {type: "choice", instructions: t("tetrisAsk"), criteria}}};
+  }
+
+  // The chosen piece falls to its place (the straight path down is free: that is how the placement was found).
+  function fall(targetY, ms, token) {
+    const fromY = g.piece.y, started = performance.now();
+    return new Promise((resolve) => {
+      const step = (now) => {
+        if (!g.running || g.token !== token) return resolve();
+        const k = Math.min(1, (now - started) / Math.max(1, ms));
+        g.piece.y = Math.round(fromY + (targetY - fromY) * k * k);
+        draw();
+        if (k < 1) requestAnimationFrame(step); else resolve();
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
+  async function modelPlays(token) {
+    while (g.running && g.token === token && g.alive) {
+      const all = placements();
+      if (!all.length) { gameOver(); break; }
+      const best = all.slice().sort((a, b) => b.value - a.value);
+      const shown = shuffle(best.slice(0, SHOWN));
+      const request = modelRequest(shown);
+      const started = performance.now();
+      const r = await call("v1/systemone", JSON.stringify(request));
+      if (!g.running || g.token !== token) return;
+      const answer = r.status === 200 && r.body.answers ? r.body.answers.place : null;
+      const pick = answer ? shown[answer.choice.charCodeAt(0) - 97] : null;
+      if (!pick) { g.running = false; g.note = callError(r); break; }
+      g.last = {request, answer, ms: performance.now() - started};
+      pace.add(g.last.ms);
+      if (pick === best[0]) g.agree += 1;
+      g.piece.m = pick.m;
+      g.piece.x = pick.x;
+      g.target = pick;
+      draw();
+      side();
+      await sleep(Math.max(100, 0.2 * pace.period()));  // show where the model put it
+      if (!g.running || g.token !== token) return;
+      g.target = null;
+      await fall(pick.y, Math.min(350, 0.25 * pace.period()), token);
+      if (!g.running || g.token !== token) return;
+      lock();
+      draw();
+      await sleep(Math.max(0, pace.period() - (performance.now() - started)));
+    }
+    draw();
+    side();
+  }
+
+  function draw() {
+    const w = cell * COLS, h = cell * ROWS;
+    ctx.fillStyle = cssVar("--code");
+    ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = cssVar("--line");
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 1; x < COLS; x++) { ctx.moveTo(x * cell + 0.5, 0); ctx.lineTo(x * cell + 0.5, h); }
+    for (let y = 1; y < ROWS; y++) { ctx.moveTo(0, y * cell + 0.5); ctx.lineTo(w, y * cell + 0.5); }
+    ctx.stroke();
+    g.board.forEach((row, y) => row.forEach((color, x) => { if (color) block(ctx, x * cell + 1, y * cell + 1, cell - 2, color, 3); }));
+    if (g.alive) {
+      const p = g.piece;
+      let gy = p.y;
+      while (!collide(p.m, p.x, gy + 1)) gy += 1;
+      ctx.globalAlpha = g.target ? 0.45 : 0.22;
+      p.m.forEach((row, r) => row.forEach((v, c) => { if (v && gy + r >= 0) block(ctx, (p.x + c) * cell + 1, (gy + r) * cell + 1, cell - 2, COLORS[p.kind], 3); }));
+      ctx.globalAlpha = 1;
+      p.m.forEach((row, r) => row.forEach((v, c) => { if (v && p.y + r >= 0) block(ctx, (p.x + c) * cell + 1, (p.y + r) * cell + 1, cell - 2, COLORS[p.kind], 3); }));
+    }
+    if (!g.alive) banner(ctx, w, h, `${t("gameOver")} · ${g.score}`);
+    else if (!g.running) banner(ctx, w, h, g.pieces ? t("paused") : mode === "you" ? t("pressStart") : t("modelStart"));
+  }
+
+  function drawNext() {
+    if (!nextCtx || !g.queue.length) return;
+    const kind = g.queue[0], m = SHAPES[kind], size = 18;
+    nextCtx.fillStyle = cssVar("--code");
+    nextCtx.fillRect(0, 0, size * 4, size * 4);
+    const ox = (4 - m[0].length) / 2, oy = (4 - m.length) / 2;
+    m.forEach((row, r) => row.forEach((v, c) => { if (v) block(nextCtx, (ox + c) * size + 1, (oy + r) * size + 1, size - 2, COLORS[kind], 3); }));
+  }
+
+  function frame(time) {  // gravity in the player's game
+    raf = null;
+    if (!g.running) return draw();
+    g.acc += Math.min(100, time - (last || time));
+    last = time;
+    if (g.acc >= interval()) down(0);
+    draw();
+    if (g.running) raf = requestAnimationFrame(frame);
+  }
+
+  function toggle() {
+    if (!g.alive) reset();
+    g.running = !g.running;
+    g.token = ++epoch;
+    last = 0;
+    if (g.running) {
+      g.note = "";
+      if (mode === "you") { if (!raf) raf = requestAnimationFrame(frame); } else modelPlays(g.token);
+    }
+    draw();
+    drawNext();
+    side();
+  }
+
+  function act(fn) { return () => { if (mode !== "you") return; if (!g.running) { if (g.alive) toggle(); return; } fn(); draw(); }; }
+
+  function setMode(m) {
+    if (g) { g.running = false; g.token = ++epoch; }
+    mode = m;
+    store.set("tetris.mode", m);
+    reset();
+    show();
+  }
+
+  function side() {
+    const parts = [el("h2", {}, t("tetrisTitle")),
+      modeButtons([["you", t("modeYou")], ["model", t("modeModel")]], mode, setMode),
+      el("div", {class: "stats"}, stat(t("points"), g.score, "tetris-score"), stat(t("lines"), g.lines, "tetris-lines"),
+        stat(t("level"), g.level, "tetris-level")),
+      el("div", {class: "small muted"}, mode === "you" ? `${t("best")}: ${bestScore("tetris-you")}`
+        : `${t("pieces")}: ${g.pieces} · ${t("agree")}: ${g.pieces ? Math.round(100 * g.agree / g.pieces) + "%" : "–"}`),
+      el("div", {class: "small muted"}, t("nextPiece")), nextCanvas,
+      el("p", {class: "small muted"}, t(mode === "you" ? "tetrisKeys" : "tetrisModelIntro"))];
+    if (mode !== "you" && pace.view()) parts.push(pace.view());
+    const below = [];
+    if (g.note) below.push(el("div", {class: "note ko"}, g.note));
+    below.push(el("div", {class: "row"}, el("button", {type: "button", class: "btn primary", onclick: toggle},
+      g.running ? t("pause") : !g.alive ? t("again") : g.pieces ? t("resume") : mode === "you" ? t("play") : t("letModelPlay"))));
+    if (!topBox) { topBox = el("div", {}); bottomBox = el("div", {}); $("tetris-side").replaceChildren(topBox, pace.control, bottomBox, decision.node); }
+    decision.update(g.last, mode !== "you");
+    topBox.replaceChildren(...parts);
+    bottomBox.replaceChildren(...below);
+    pace.control.classList.toggle("hidden", mode === "you");
+    pace.relabel();
+    $("tetris-pad").classList.toggle("hidden", mode !== "you");
+    drawNext();
+  }
+
+  function show() {
+    const phone = window.innerWidth < 861;  // the pad sits under the board: leave room for it
+    const byHeight = Math.floor((window.innerHeight - (phone && mode === "you" ? 330 : 200)) / ROWS);
+    cell = Math.max(16, Math.min(30, byHeight, Math.floor(boardWidth(300) / COLS)));
+    ctx = fitCanvas($("tetris-canvas"), cell * COLS, cell * ROWS);
+    nextCtx = fitCanvas(nextCanvas, 72, 72);
+    if (!g) {
+      reset();
+      $("tetris-pad").replaceChildren(pad([["⟲", "rotate back", act(() => rotate(-1))], ["⟳", "rotate", act(() => rotate(1))],
+        ["⤓", "drop", act(drop)], ["◀", "left", act(() => move(-1))], ["▼", "down", act(() => down(1))], ["▶", "right", act(() => move(1))]]));
+    }
+    side();
+    draw();
+  }
+
+  function key(e) {
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (k === "p" || (k === " " && mode !== "you")) { toggle(); return true; }
+    const actions = {ArrowLeft: () => move(-1), ArrowRight: () => move(1), ArrowDown: () => down(1), ArrowUp: () => rotate(1),
+                     x: () => rotate(1), z: () => rotate(-1), " ": drop};
+    if (!actions[k] || mode !== "you") return false;
+    act(actions[k])();
+    return true;
+  }
+
+  function pause() { if (g && g.running) toggle(); }
+
+  return {show, key, pause, relang: () => g && side()};
+})();
+
+// ---------------------------------------------------------------- pac-man
+
+const pacman = (() => {
+  const MAZE = [
+    "###################",
+    "#........#........#",
+    "#o##.###.#.###.##o#",
+    "#.................#",
+    "#.##.#.#####.#.##.#",
+    "#....#...#...#....#",
+    "####.###.#.###.####",
+    "####.#.......#.####",
+    "####.#.#GGG#.#.####",
+    "####.#.#####.#.####",
+    "#........#........#",
+    "#.##.###.#.###.##.#",
+    "#o.#.....P.....#.o#",
+    "##.#.#.#####.#.#.##",
+    "#....#...#...#....#",
+    "#.######.#.######.#",
+    "#.................#",
+    "###################",
+  ];
+  const H = MAZE.length, W = MAZE[0].length;
+  const DIRS = {up: {x: 0, y: -1}, down: {x: 0, y: 1}, left: {x: -1, y: 0}, right: {x: 1, y: 0}};
+  const GHOSTS = [{color: "#ff4d4d", chase: 0.8}, {color: "#ff9de0", chase: 0.6}, {color: "#4de1ff", chase: 0.4}];
+  const POWER_TURNS = 30;
+  // A move is safe when the nearest ghost is at least 3 steps away and Pac-Man would still reach at least 10 cells
+  // before any ghost (a corridor closed by ghosts at both ends has few). Measured with a simple rule over 20 games of
+  // 300 turns: 0.40 lives lost per game instead of 1.45 with the ghost distance alone, as many dots eaten.
+  const SAFE_GHOST = 3, SAFE_CELLS = 10;
+  let g = null, timer = null, cell = 22, ctx = null, touch = null, epoch = 0, topBox = null, bottomBox = null;
+  const pace = makePacer(150, "pacman.speed"), decision = makeDecisionBox();
+  let mode = store.get("pacman.mode") === "you" ? "you" : "model";
+
+  const wall = (x, y) => x < 0 || y < 0 || x >= W || y >= H || MAZE[y][x] === "#";
+  const at = (p) => p.x + "," + p.y;
+  const cells = (ch) => MAZE.flatMap((row, y) => [...row].map((c, x) => (c === ch ? {x, y} : null)).filter(Boolean));
+  const START = cells("P")[0], PEN = cells("G");
+
+  function exits(p) { return Object.keys(DIRS).filter((k) => !wall(p.x + DIRS[k].x, p.y + DIRS[k].y)); }
+
+  // Path lengths through the maze from one cell to every other (breadth-first): "how far" for Pac-Man and ghosts.
+  function distances(from) {
+    const dist = new Map([[at(from), 0]]), todo = [from];
+    for (let i = 0; i < todo.length; i++) {
+      const p = todo[i];
+      for (const d of Object.values(DIRS)) {
+        const n = {x: p.x + d.x, y: p.y + d.y};
+        if (wall(n.x, n.y) || dist.has(at(n))) continue;
+        dist.set(at(n), dist.get(at(p)) + 1);
+        todo.push(n);
+      }
+    }
+    return dist;
+  }
+
+  function fill() {
+    g.dots = new Map();
+    MAZE.forEach((row, y) => [...row].forEach((c, x) => { if (c === "." || c === "o") g.dots.set(x + "," + y, c === "o" ? "power" : "dot"); }));
+  }
+
+  function place() {  // start positions; the dots stay
+    g.pac = {...START};
+    g.pacPrev = {...START};
+    g.dir = DIRS.left;
+    g.want = null;
+    g.power = 0;
+    g.ghosts = PEN.map((p, i) => ({x: p.x, y: p.y, start: {...p}, prev: null, dir: DIRS.up, scared: false, ...GHOSTS[i % GHOSTS.length]}));
+  }
+
+  function reset() {
+    g = {score: 0, lives: 3, level: 1, turn: 0, alive: true, running: false, token: -1, last: null, note: "", noteOk: false, mouth: 0};
+    fill();
+    place();
+  }
+
+  function setNote(text, ok) { g.note = text; g.noteOk = ok; }
+
+  function eat() {
+    const what = g.dots.get(at(g.pac));
+    if (!what) return;
+    g.dots.delete(at(g.pac));
+    if (what === "dot") { g.score += 10; return; }
+    g.score += 50;
+    g.power = POWER_TURNS;
+    for (const gh of g.ghosts) { gh.scared = true; gh.dir = {x: -gh.dir.x, y: -gh.dir.y}; }
+  }
+
+  // Same cell, or Pac-Man and a ghost swapped cells this turn. A frightened ghost is eaten and goes home.
+  function hit() {
+    for (const gh of g.ghosts) {
+      const same = gh.x === g.pac.x && gh.y === g.pac.y;
+      const swapped = gh.prev && gh.prev.x === g.pac.x && gh.prev.y === g.pac.y && gh.x === g.pacPrev.x && gh.y === g.pacPrev.y;
+      if (!same && !swapped) continue;
+      if (gh.scared) {
+        g.score += 200;
+        Object.assign(gh, {x: gh.start.x, y: gh.start.y, prev: null, scared: false, dir: DIRS.up});
+        continue;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  function moveGhosts() {
+    const toPac = distances(g.pac);
+    const rest = g.turn % Math.max(4, 2 + 2 * g.level) === 0;  // a little slower than Pac-Man, less so each level
+    for (const gh of g.ghosts) {
+      gh.prev = {x: gh.x, y: gh.y};
+      if (rest || (gh.scared && g.turn % 2)) continue;  // frightened ghosts move every other turn
+      let options = exits(gh).filter((k) => !(DIRS[k].x === -gh.dir.x && DIRS[k].y === -gh.dir.y));
+      if (!options.length) options = exits(gh);
+      const far = (k) => toPac.get((gh.x + DIRS[k].x) + "," + (gh.y + DIRS[k].y)) ?? 999;
+      const pick = !gh.scared && Math.random() < gh.chase
+        ? options.reduce((a, b) => (far(a) <= far(b) ? a : b))
+        : options[Math.floor(Math.random() * options.length)];
+      gh.dir = DIRS[pick];
+      gh.x += gh.dir.x;
+      gh.y += gh.dir.y;
+    }
+  }
+
+  function lose() {
+    g.lives -= 1;
+    setNote(t("caught"), false);
+    if (g.lives > 0) { place(); return; }
+    g.alive = false;
+    g.running = false;
+    bestScore("pacman-" + mode, g.score);
+  }
+
+  function step() {
+    g.turn += 1;
+    for (const gh of g.ghosts) gh.prev = null;
+    if (g.want && !wall(g.pac.x + g.want.x, g.pac.y + g.want.y)) g.dir = g.want;
+    g.pacPrev = {...g.pac};
+    if (!wall(g.pac.x + g.dir.x, g.pac.y + g.dir.y)) { g.pac.x += g.dir.x; g.pac.y += g.dir.y; g.mouth ^= 1; }
+    eat();
+    if (hit()) return lose();
+    moveGhosts();
+    if (hit()) return lose();
+    if (g.power > 0 && --g.power === 0) for (const gh of g.ghosts) gh.scared = false;
+    if (!g.dots.size) {
+      g.level += 1;
+      setNote(fmt(t("levelUp"), {n: g.level}), true);
+      fill();
+      place();
+    }
+  }
+
+  // What each way would do, worked out here; the model only compares (code computes, the model decides).
+  function modelRequest() {
+    const f = T[S.lang].pacFields;
+    const hunters = g.ghosts.filter((gh) => !gh.scared).map((gh) => distances(gh));
+    const prey = g.ghosts.filter((gh) => gh.scared).map((gh) => distances(gh));
+    const moves = {};
+    for (const k of exits(g.pac)) {
+      const n = {x: g.pac.x + DIRS[k].x, y: g.pac.y + DIRS[k].y}, here = at(n);
+      const ghost = hunters.length ? Math.min(...hunters.map((m) => m.get(here) ?? 99)) : null;
+      const eats = g.dots.get(here) || (g.ghosts.some((gh) => gh.scared && gh.x === n.x && gh.y === n.y) ? "ghost" : "nothing");
+      const fromN = distances(n);
+      const dot = g.dots.has(here) || !g.dots.size ? 0 : Math.min(...[...g.dots.keys()].map((d) => fromN.get(d) ?? 99));
+      let room = null;  // cells Pac-Man reaches before any ghost could
+      if (hunters.length) {
+        room = 0;
+        for (const [c, d] of fromN) if (d < Math.min(...hunters.map((m) => m.get(c) ?? 99)) - 1) room += 1;
+      }
+      const move = {[f.safe]: ghost === null || (ghost >= SAFE_GHOST && room >= SAFE_CELLS)};
+      if (ghost !== null) move[f.ghost] = ghost;
+      if (room !== null) move[f.room] = room;
+      move[f.eats] = t("eat_" + eats);
+      move[f.dot] = dot;
+      if (prey.length) move[f.prey] = Math.min(...prey.map((m) => m.get(here) ?? 99));
+      moves[k] = move;
+    }
+    const state = {[f.lives]: g.lives, [f.moves]: moves};
+    if (g.power) state[f.power] = g.power;
+    return {state, questions: {move: {type: "choice", instructions: t("pacAsk"),
+                                      criteria: Object.fromEntries(Object.keys(moves).map((k) => [k, t("dir_" + k)]))}}};
+  }
+
+  function tick() {  // the player's game
+    timer = null;
+    if (!g.running) return;
+    step();
+    draw();
+    side();
+    if (g.running) timer = setTimeout(tick, 170);
+  }
+
+  async function modelPlays(token) {
+    while (g.running && g.token === token) {
+      const request = modelRequest();
+      const started = performance.now();
+      const r = await call("v1/systemone", JSON.stringify(request));
+      if (!g.running || g.token !== token) return;
+      const answer = r.status === 200 && r.body.answers ? r.body.answers.move : null;
+      if (!answer || !DIRS[answer.choice]) {
+        g.running = false;
+        setNote(callError(r), false);
+        break;
+      }
+      g.last = {request, answer, ms: performance.now() - started};
+      pace.add(g.last.ms);
+      g.want = DIRS[answer.choice];
+      step();
+      draw();
+      side();
+      await sleep(Math.max(0, pace.period() - (performance.now() - started)));
+    }
+    draw();
+    side();
+  }
+
+  function toggle() {
+    if (!g.alive) reset();
+    g.running = !g.running;
+    g.token = ++epoch;
+    if (g.running) {
+      if (mode === "you") { if (!timer) timer = setTimeout(tick, 120); } else modelPlays(g.token);
+    }
+    draw();
+    side();
+  }
+
+  function turn(x, y) {
+    if (mode !== "you") return;
+    g.want = Object.values(DIRS).find((d) => d.x === x && d.y === y);
+    if (!g.running) toggle();
+  }
+
+  function drawGhost(gh, x, y) {
+    const r = cell * 0.42, cx = x + cell / 2, cy = y + cell / 2;
+    const blink = gh.scared && g.power <= 6 && g.turn % 2;
+    ctx.fillStyle = gh.scared ? (blink ? "#f4f4f4" : "#3355ff") : gh.color;
+    ctx.beginPath();
+    ctx.arc(cx, cy - r * 0.15, r, Math.PI, 0);
+    ctx.lineTo(cx + r, cy + r);
+    for (let i = 3; i >= 0; i--) ctx.lineTo(cx - r + (2 * r * i) / 3, cy + r - (i % 2 ? r * 0.3 : 0));
+    ctx.closePath();
+    ctx.fill();
+    for (const side of [-1, 1]) {
+      const ex = cx + side * r * 0.4, ey = cy - r * 0.25;
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(ex, ey, r * 0.28, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = gh.scared ? "#3355ff" : "#1b2a6b";
+      ctx.beginPath();
+      ctx.arc(ex + gh.dir.x * r * 0.12, ey + gh.dir.y * r * 0.12, r * 0.13, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  }
+
+  function draw() {
+    const w = cell * W, h = cell * H;
+    ctx.fillStyle = "#0b1020";
+    ctx.fillRect(0, 0, w, h);
+    MAZE.forEach((row, y) => [...row].forEach((c, x) => {
+      if (c !== "#") return;
+      ctx.fillStyle = "#16236a";
+      ctx.fillRect(x * cell, y * cell, cell, cell);
+      block(ctx, x * cell + 3, y * cell + 3, cell - 6, "#2f56e0", 3);
+    }));
+    for (const [k, what] of g.dots) {
+      const [x, y] = k.split(",").map(Number);
+      ctx.fillStyle = "#f8e0b0";
+      ctx.beginPath();
+      ctx.arc(x * cell + cell / 2, y * cell + cell / 2, what === "power" ? cell * (g.turn % 2 ? 0.28 : 0.24) : cell * 0.1, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    for (const gh of g.ghosts) drawGhost(gh, gh.x * cell, gh.y * cell);
+    const angle = Math.atan2(g.dir.y, g.dir.x), mouth = g.mouth ? 0.28 * Math.PI : 0.06 * Math.PI;
+    const cx = g.pac.x * cell + cell / 2, cy = g.pac.y * cell + cell / 2;
+    ctx.fillStyle = "#ffd400";
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, cell * 0.44, angle + mouth, angle + 2 * Math.PI - mouth);
+    ctx.closePath();
+    ctx.fill();
+    if (!g.alive) banner(ctx, w, h, `${t("gameOver")} · ${g.score}`);
+    else if (!g.running) banner(ctx, w, h, g.turn ? t("paused") : mode === "you" ? t("pressStart") : t("modelStart"));
+  }
+
+  function setMode(m) {
+    if (g) { g.running = false; g.token = ++epoch; }
+    if (timer) { clearTimeout(timer); timer = null; }
+    mode = m;
+    store.set("pacman.mode", m);
+    reset();
+    show();
+  }
+
+  function side() {
+    const parts = [el("h2", {}, t("pacTitle")),
+      modeButtons([["you", t("modeYou")], ["model", t("modeModel")]], mode, setMode),
+      el("div", {class: "stats"}, stat(t("points"), g.score), stat(t("lives"), "♥".repeat(Math.max(0, g.lives)) || "0"),
+        stat(t("dotsLeft"), g.dots.size)),
+      el("div", {class: "small muted"}, `${t("level")}: ${g.level}` + (mode === "you" ? ` · ${t("best")}: ${bestScore("pacman-you")}`
+        : ` · ${t("best")}: ${bestScore("pacman-model")}`)),
+      el("p", {class: "small muted"}, t(mode === "you" ? "pacKeys" : "pacModelIntro"))];
+    if (mode !== "you" && pace.view()) parts.push(pace.view());
+    const below = [];
+    if (g.note) below.push(el("div", {class: "note " + (g.noteOk ? "ok" : "ko")}, g.note));
+    below.push(el("div", {class: "row"}, el("button", {type: "button", class: "btn primary", onclick: toggle},
+      g.running ? t("pause") : !g.alive ? t("again") : g.turn ? t("resume") : mode === "you" ? t("play") : t("letModelPlay"))));
+    if (!topBox) { topBox = el("div", {}); bottomBox = el("div", {}); $("pacman-side").replaceChildren(topBox, pace.control, bottomBox, decision.node); }
+    topBox.replaceChildren(...parts);
+    bottomBox.replaceChildren(...below);
+    decision.update(g.last, mode !== "you");
+    pace.control.classList.toggle("hidden", mode === "you");
+    pace.relabel();
+    $("pacman-pad").classList.toggle("hidden", mode !== "you");
+  }
+
+  function show() {
+    const phone = window.innerWidth < 861;
+    const byHeight = Math.floor((window.innerHeight - (phone && mode === "you" ? 330 : 200)) / H);
+    cell = Math.max(14, Math.min(28, byHeight, Math.floor(boardWidth(520) / W)));
+    ctx = fitCanvas($("pacman-canvas"), cell * W, cell * H);
+    if (!g) {
+      reset();
+      $("pacman-pad").replaceChildren(pad([null, ["▲", "up", () => turn(0, -1)], null,
+        ["◀", "left", () => turn(-1, 0)], ["▼", "down", () => turn(0, 1)], ["▶", "right", () => turn(1, 0)]]));
+      const c = $("pacman-canvas");
+      c.addEventListener("pointerdown", (e) => { touch = {x: e.clientX, y: e.clientY}; });
+      c.addEventListener("pointerup", (e) => {
+        if (!touch) return;
+        const dx = e.clientX - touch.x, dy = e.clientY - touch.y;
+        touch = null;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return toggle();
+        if (Math.abs(dx) > Math.abs(dy)) turn(Math.sign(dx), 0); else turn(0, Math.sign(dy));
+      });
+    }
+    draw();
+    side();
+  }
+
+  function key(e) {
+    const dirs = {ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0]};
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (k === " " || k === "p") { toggle(); return true; }
+    if (dirs[k] && mode === "you") { turn(...dirs[k]); return true; }
+    return false;
+  }
+
+  function pause() { if (g && g.running) toggle(); }
+
+  return {show, key, pause, relang: () => g && side()};
+})();
+
+// ---------------------------------------------------------------- metrics (GET /metrics)
+
+async function callText(path) {
+  const headers = S.apiKey ? {"Authorization": "Bearer " + S.apiKey} : {};
+  try {
+    const response = await fetch(path, {headers});
+    if (response.status === 401) $("keybox").classList.add("show");
+    return {status: response.status, text: await response.text()};
+  } catch (e) {
+    return {status: 0, text: ""};
+  }
+}
+
+const metricsView = (() => {
+  const HISTOGRAMS = ["request_seconds", "forward_seconds", "queue_wait_seconds"];
+  let timer = null, previous = null, history = [], latest = null, ui = null;
+
+  function parse(text) {
+    const out = {};
+    for (const line of text.split("\n")) {
+      const m = line.match(/^sonda_(\w+?)(?:\{([^}]*)\})?\s+(\S+)$/);
+      if (!m) continue;
+      const labels = {};
+      for (const pair of (m[2] || "").split(",").filter(Boolean)) {
+        const [k, v] = pair.split("=");
+        labels[k] = v.replace(/^"|"$/g, "");
+      }
+      (out[m[1]] = out[m[1]] || []).push({labels, value: Number(m[3])});
+    }
+    return out;
+  }
+
+  function total(m, name) { return (m[name] || []).reduce((s, e) => s + e.value, 0); }
+
+  function hist(m, name) {
+    const buckets = (m[name + "_bucket"] || []).map((e) => ({le: e.labels.le === "+Inf" ? Infinity : Number(e.labels.le), cum: e.value}));
+    return {buckets, sum: total(m, name + "_sum"), count: total(m, name + "_count")};
+  }
+
+  function quantile(h, q) {  // from cumulative buckets, linear inside a bucket
+    if (!h.count) return null;
+    const target = q * h.count;
+    let lo = 0, below = 0;
+    for (const b of h.buckets) {
+      if (b.cum >= target) return b.le === Infinity ? lo : lo + (b.le - lo) * (target - below) / Math.max(1, b.cum - below);
+      lo = b.le;
+      below = b.cum;
+    }
+    return lo;
+  }
+
+  function ms(seconds) { return seconds === null || Number.isNaN(seconds) ? "–" : seconds < 1 ? `${Math.round(seconds * 1000)} ms` : `${seconds.toFixed(2)} s`; }
+
+  function countBars(entries) {
+    if (!entries.length) return [el("div", {class: "small muted"}, "–")];
+    const top = Math.max(...entries.map(([, v]) => v), 1);
+    return [el("div", {class: "bars"}, entries.map(([label, v]) => [
+      el("div", {class: "lab"}, label), el("div", {class: "track"}, el("div", {class: "fill top", style: `width:${(100 * v / top).toFixed(1)}%`})),
+      el("div", {class: "val"}, String(v))]))];
+  }
+
+  function byLabel(m, name, label) { return (m[name] || []).map((e) => [e.labels[label], e.value]).sort((a, b) => b[1] - a[1]); }
+
+  // The chart takes the width its box gives it (CSS: 100% wide, fixed height) and draws at the screen's resolution.
+  function drawSpark() {
+    const canvas = ui && ui.spark;
+    if (!canvas || !canvas.isConnected) return;
+    const width = canvas.clientWidth, height = canvas.clientHeight;
+    if (!width || !height) return;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.fillStyle = cssVar("--code");
+    ctx.fillRect(0, 0, width, height);
+    const top = Math.max(...history, 0.1);
+    ctx.fillStyle = cssVar("--muted");
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.textBaseline = "top";
+    ctx.fillText(`${top.toFixed(2)}/s`, 6, 4);
+    if (history.length < 2) return;
+    ctx.strokeStyle = cssVar("--accent");
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    history.forEach((v, i) => {
+      const x = 2 + (i / (history.length - 1)) * (width - 4), y = height - 4 - (v / top) * (height - 22);
+      if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+    });
+    ctx.stroke();
+  }
+
+  // Built once per language; a refresh only changes numbers, so nothing jumps and an open "raw text" stays open.
+  function build() {
+    const h3 = (key) => el("h3", {}, t(key));
+    ui = {updated: el("span", {class: "small muted"}), error: el("div", {class: "error hidden"}),
+          stats: el("div", {class: "stats wide"}), spark: el("canvas", {class: "spark", "aria-label": t("mHistory")}),
+          times: el("tbody", {}), batch: el("p", {}), status: el("div", {}), reasons: el("div", {}), dropped: el("div", {}),
+          raw: el("pre", {}), details: null};
+    ui.details = el("details", {}, el("summary", {}, t("mRaw")), ui.raw);
+    ui.content = el("div", {}, el("p", {class: "muted small"}, t("metricsIntro")), ui.stats,
+      h3("mHistory"), ui.spark,
+      h3("mTimes"), el("div", {class: "table-wrap"}, el("table", {class: "ref"},
+        el("thead", {}, el("tr", {}, [t("mWhat"), t("mCount"), t("mMean"), "p50", "p95"].map((x) => el("th", {}, x)))), ui.times)),
+      h3("mBatch"), ui.batch,
+      el("div", {class: "versus"}, el("div", {}, h3("mByStatus"), ui.status), el("div", {}, h3("mByReason"), ui.reasons)),
+      h3("mDropped"), ui.dropped, ui.details);
+    $("metrics-panel").replaceChildren(
+      el("div", {class: "row"}, el("h2", {}, t("tabMetrics")), el("span", {class: "spacer"}), ui.updated,
+        el("button", {type: "button", class: "btn", onclick: () => refresh()}, t("refresh"))),
+      ui.error, ui.content);
+  }
+
+  function render(status, text) {
+    if (!ui || !ui.content.isConnected) build();
+    ui.updated.textContent = fmt(t("updated"), {time: new Date().toLocaleTimeString()});
+    const failed = status !== 200;
+    ui.error.classList.toggle("hidden", !failed);
+    ui.content.classList.toggle("hidden", failed);
+    if (failed) {
+      ui.error.textContent = `${t("http")} ${status || "—"}` + (status === 401 ? " — " + t("needKey") : "");
+      return;
+    }
+    const m = parse(text), now = performance.now();
+    const requests = total(m, "requests_total");
+    const req = hist(m, "request_seconds");
+    let rate = null, recentMean = null;
+    if (previous && now > previous.time) {
+      const dt = (now - previous.time) / 1000;
+      rate = Math.max(0, (requests - previous.requests) / dt);
+      const dn = req.count - previous.count;
+      recentMean = dn > 0 ? (req.sum - previous.sum) / dn : null;
+      history.push(rate);
+      if (history.length > 60) history.shift();
+    }
+    previous = {time: now, requests, count: req.count, sum: req.sum};
+    const batch = hist(m, "batch_size");
+    ui.stats.replaceChildren(
+      stat(t("mRequests"), requests), stat(t("mQuestions"), total(m, "questions_total")),
+      stat(t("mRejected"), total(m, "rejected_total")), stat(t("mQueue"), total(m, "queue_depth")),
+      stat(t("mRate"), rate === null ? "–" : rate.toFixed(2)), stat(t("mLatency"), ms(recentMean ?? (req.count ? req.sum / req.count : null))));
+    ui.times.replaceChildren(...HISTOGRAMS.map((name) => {
+      const h = hist(m, name);
+      return el("tr", {}, el("td", {}, T[S.lang].histNames[name]), el("td", {}, String(h.count)),
+        el("td", {}, ms(h.count ? h.sum / h.count : null)), el("td", {}, ms(quantile(h, 0.5))), el("td", {}, ms(quantile(h, 0.95))));
+    }));
+    ui.batch.textContent = fmt(t("mBatchLine"), {passes: total(m, "passes_total"), batches: total(m, "batches_total"),
+      mean: batch.count ? (batch.sum / batch.count).toFixed(2) : "–", p95: batch.count ? Math.ceil(quantile(batch, 0.95)) : "–"});
+    ui.status.replaceChildren(...countBars(byLabel(m, "requests_total", "status")));
+    ui.reasons.replaceChildren(...countBars(byLabel(m, "rejected_total", "reason")));
+    const omitted = total(m, "omitted_answers_total");
+    ui.dropped.replaceChildren(...countBars([...byLabel(m, "dropped_fields_total", "field"), ...(omitted ? [[t("mOmitted"), omitted]] : [])]));
+    ui.raw.textContent = text;
+    drawSpark();
+  }
+
+  async function refresh() {
+    const r = await callText("metrics");
+    latest = r;
+    if (S.tab === "metrics") render(r.status, r.text);
+  }
+
+  function start() { refresh(); if (!timer) timer = setInterval(refresh, 5000); }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } }
+  function relang() { if (ui) { ui = null; if (latest && S.tab === "metrics") render(latest.status, latest.text); } }
+
+  window.addEventListener("resize", () => { if (S.tab === "metrics") drawSpark(); });
+  return {start, stop, refresh, relang};
+})();
+
+// ---------------------------------------------------------------- API reference
+
+function table(head, rows) {
+  return el("div", {class: "table-wrap"}, el("table", {class: "ref"}, el("thead", {}, el("tr", {}, head.map((h) => el("th", {}, h)))),
+    el("tbody", {}, rows.map((r) => el("tr", {}, r.map((c, i) => el("td", {}, i === 0 || i === 2 ? el("code", {}, c) : c)))))));
+}
+
+function renderApi() {
+  const parts = [el("h2", {}, t("apiTitle")), el("p", {class: "muted"}, t("apiIntro")),
+    table([t("endpoint"), t("meaning")], T[S.lang].endpoints),
+    el("h3", {}, t("typesTitle")), table(["type", t("meaning"), "question", "answer"], T[S.lang].types),
+    el("h3", {}, t("statusTitle")), table(["HTTP", t("meaning")], T[S.lang].statuses)];
+  if (S.modelInfo && S.modelInfo.calibration) {
+    const c = S.modelInfo.calibration;
+    const rows = [["default", String(c.temperature)], ...Object.entries(c.temperature_per_type || {}).map(([k, v]) => [k, String(v)])];
+    if (c.knockout_temperature) rows.push(["> 16 options", String(c.knockout_temperature)]);
+    parts.push(el("h3", {}, t("calib")), table(["type", "T"], rows));
+  }
+  $("api-panel").replaceChildren(...parts);
+}
+
+// ---------------------------------------------------------------- start
+
+function initTheme() {
+  const saved = store.get("theme");
+  if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+  $("theme").addEventListener("click", () => {
+    const dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.dataset.theme = dark ? "light" : "dark";
+    store.set("theme", document.documentElement.dataset.theme);
+    if (S.tab === "game" && ARCADE()[S.gameKind]) ARCADE()[S.gameKind].show();
+    if (S.tab === "metrics") metricsView.refresh();
+  });
+}
+
+async function init() {
+  initTheme();
+  $("send-shortcut").textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘ ↵" : "Ctrl ↵";
+  $("filter-toggle").addEventListener("click", () => {
+    const open = document.querySelector(".library").classList.toggle("filters-open");
+    $("filter-toggle").setAttribute("aria-expanded", String(open));
+    $("filter-toggle").textContent = t(open ? "hideFilters" : "showFilters");
+  });
+  $("example-search").addEventListener("input", (e) => { S.search = e.target.value.trim(); renderList(); });
+  document.querySelectorAll('[role="tablist"]').forEach((tablist) => tablist.addEventListener("keydown", (e) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    const tabs = [...tablist.querySelectorAll('[role="tab"]')];
+    const index = tabs.indexOf(document.activeElement);
+    if (index < 0) return;
+    e.preventDefault();
+    const next = e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : (index + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[next].focus(); tabs[next].click();
+  }));
+  document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => {
+    S.lang = b.dataset.lang; store.set("lang", S.lang); applyLang();
+  }));
+  document.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.tab)));
+  // the chosen game gets the keys (Space included), not the button that chose it
+  document.querySelectorAll("[data-game]").forEach((b) => b.addEventListener("click", () => { b.blur(); showGame(b.dataset.game); }));
+  document.addEventListener("keydown", (e) => {
+    if (S.tab !== "game" || e.ctrlKey || e.metaKey || e.altKey || e.target.closest("input, textarea, select")) return;
+    if ((e.key === " " || e.key === "Enter") && e.target.closest("button")) return;  // the focused button acts
+    const game = ARCADE()[S.gameKind];
+    if (game && game.key(e)) e.preventDefault();
+  });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) for (const game of Object.values(ARCADE())) game.pause(); });
+  window.addEventListener("resize", () => {
+    if (S.tab === "game" && ARCADE()[S.gameKind]) ARCADE()[S.gameKind].show();
+  });
+  document.querySelectorAll("[data-code]").forEach((b) => b.addEventListener("click", () => {
+    S.code = b.dataset.code; store.set("code", S.code); renderCode();
+  }));
+  $("f-domain").addEventListener("change", (e) => { S.filter.domain = e.target.value; renderList(); });
+  $("send").addEventListener("click", send);
+  $("reset").addEventListener("click", () => S.current && loadExample(S.current));
+  $("format").addEventListener("click", () => {
+    const parsed = parseRequest();
+    if (!parsed.error) $("request").value = JSON.stringify(parsed.value, null, 2);
+    renderCode();
+  });
+  $("request").addEventListener("input", renderCode);
+  $("request").addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); send(); } });
+  $("api-key").addEventListener("input", (e) => {
+    S.apiKey = e.target.value.trim();
+    renderCode();
+    clearTimeout(S.keyTimer);
+    S.keyTimer = setTimeout(() => { refreshHealth(); if (S.tab === "metrics") metricsView.refresh(); }, 400);
+  });
+  $("copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText($("code").textContent); $("copy").textContent = t("copied"); }
+    catch (e) { $("status").textContent = t("copyFailed"); }
+    setTimeout(() => { $("copy").textContent = t("copy"); }, 1200);
+  });
+
+  const r = await call("demo/examples.json");
+  S.data = r.status === 200 ? r.body : {domains: {}, examples: []};
+  S.examplesFailed = r.status !== 200;
+  let wanted = "";
+  try { wanted = decodeURIComponent(location.hash.slice(1)); } catch (e) { /* malformed URL hash */ }
+  S.current = S.data.examples.some((e) => e.id === wanted) ? wanted : (S.data.examples[0] || {}).id || null;
+  applyLang();
+  setTab("examples");
+  refreshHealth();
+  setInterval(refreshHealth, 15000);
+}
+
+init();
+</script>
+</body>
+</html>

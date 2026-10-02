@@ -1,0 +1,626 @@
+{
+  "about": "Invented examples of /v1/systemone requests for the demo page. Option keys are the same in both languages; `expected` (where the answer follows from the text) is used by the game.",
+  "domains": {
+    "support": {"en": "Customer support", "pl": "Obsługa klienta"},
+    "finance": {"en": "Finance", "pl": "Finanse"},
+    "law": {"en": "Law and contracts", "pl": "Prawo i umowy"},
+    "logistics": {"en": "Logistics", "pl": "Logistyka"},
+    "hr": {"en": "Human resources", "pl": "Kadry"},
+    "it": {"en": "IT operations", "pl": "Utrzymanie IT"},
+    "commerce": {"en": "Online shop", "pl": "Sklep internetowy"},
+    "travel": {"en": "Travel", "pl": "Podróże"},
+    "moderation": {"en": "Content moderation", "pl": "Moderacja treści"},
+    "clinic": {"en": "Clinic front desk", "pl": "Rejestracja przychodni"}
+  },
+  "examples": [
+    {
+      "id": "moderation-comment",
+      "domain": "moderation",
+      "data": "text",
+      "title": {"en": "Moderate a comment: two questions", "pl": "Moderacja komentarza: dwa pytania"},
+      "expected": {"spam": "true", "category": "spam"},
+      "request": {
+        "en": {
+          "state": "Great article!!! Want 10,000 followers by tomorrow? Cheap packages at example.com, use code FAST50 now!!!",
+          "questions": {
+            "spam": {"type": "noul", "instructions": "The comment advertises something unrelated to the article."},
+            "category": {"type": "choice", "instructions": "How should the comment be labelled?",
+                         "criteria": {"ok": "Acceptable", "spam": "Spam or advertising", "abuse": "Insults or harassment", "off_topic": "Off topic but harmless"}}
+          }
+        },
+        "pl": {
+          "state": "Świetny artykuł!!! Chcesz mieć 10 000 obserwujących do jutra? Tanie pakiety na example.com, kod SZYBKO50 tylko dziś!!!",
+          "questions": {
+            "spam": {"type": "noul", "instructions": "Komentarz reklamuje coś niezwiązanego z artykułem."},
+            "category": {"type": "choice", "instructions": "Jak oznaczyć komentarz?",
+                         "criteria": {"ok": "Dopuszczalny", "spam": "Spam lub reklama", "abuse": "Obraźliwy lub nękający", "off_topic": "Nie na temat, ale nieszkodliwy"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "support-all-types",
+      "domain": "support",
+      "data": "text",
+      "title": {"en": "One ticket, three question types", "pl": "Jedno zgłoszenie, trzy typy pytań"},
+      "expected": {"wants_refund": "false", "desk": "returns"},
+      "request": {
+        "en": {
+          "state": "Order 7120 arrived damaged yesterday. The customer attached photos and asks for a replacement, not a refund.",
+          "questions": {
+            "wants_refund": {"type": "noul", "instructions": "The customer asks for their money back."},
+            "desk": {"type": "choice", "instructions": "Which desk should handle the ticket?",
+                     "criteria": {"returns": "Returns and replacements", "billing": "Payments and invoices", "tech": "Technical problems with the app"}},
+            "urgency": {"type": "score", "instructions": "How urgent is the ticket?",
+                        "criteria": ["Can wait a week", "Within a few days", "Today"]}
+          }
+        },
+        "pl": {
+          "state": "Zamówienie 7120 dotarło wczoraj uszkodzone. Klient dołączył zdjęcia i prosi o wymianę towaru, nie o zwrot pieniędzy.",
+          "questions": {
+            "wants_refund": {"type": "noul", "instructions": "Klient prosi o zwrot pieniędzy."},
+            "desk": {"type": "choice", "instructions": "Który dział powinien zająć się zgłoszeniem?",
+                     "criteria": {"returns": "Zwroty i wymiany", "billing": "Płatności i faktury", "tech": "Problemy techniczne z aplikacją"}},
+            "urgency": {"type": "score", "instructions": "Jak pilne jest zgłoszenie?",
+                        "criteria": ["Może poczekać tydzień", "W ciągu kilku dni", "Dziś"]}
+          }
+        }
+      }
+    },
+    {
+      "id": "support-route-ticket",
+      "domain": "support",
+      "data": "text",
+      "title": {"en": "Route a ticket to a desk", "pl": "Przydział zgłoszenia do działu"},
+      "expected": {"desk": "billing"},
+      "request": {
+        "en": {
+          "state": "Hi, my March invoice shows two charges for the same subscription. Could you give one of them back?",
+          "questions": {
+            "desk": {"type": "choice", "instructions": "Which desk should handle this message?",
+                     "criteria": {"billing": "Payments, invoices, refunds", "tech": "Bugs and outages", "sales": "Quotes, prices, plan changes", "account": "Login, password, profile data"}}
+          }
+        },
+        "pl": {
+          "state": "Dzień dobry, na fakturze za marzec widzę dwa obciążenia za tę samą subskrypcję. Czy mogą Państwo oddać jedno z nich?",
+          "questions": {
+            "desk": {"type": "choice", "instructions": "Który dział powinien obsłużyć tę wiadomość?",
+                     "criteria": {"billing": "Płatności, faktury, zwroty", "tech": "Błędy i awarie", "sales": "Oferty, ceny, zmiana planu", "account": "Logowanie, hasło, dane profilu"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "support-not-a-refund",
+      "domain": "support",
+      "data": "text",
+      "title": {"en": "A negation trap", "pl": "Pułapka z przeczeniem"},
+      "expected": {"wants_refund": "false"},
+      "request": {
+        "en": {
+          "state": "The app crashes every time I export a report. I don't want my money back, I just need it fixed before Friday.",
+          "questions": {
+            "wants_refund": {"type": "noul", "instructions": "The customer asks for a refund."}
+          }
+        },
+        "pl": {
+          "state": "Aplikacja zawiesza się przy każdym eksporcie raportu. Nie chcę zwrotu pieniędzy, potrzebuję tylko naprawy przed piątkiem.",
+          "questions": {
+            "wants_refund": {"type": "noul", "instructions": "Klient prosi o zwrot pieniędzy."}
+          }
+        }
+      }
+    },
+    {
+      "id": "support-urgency-object",
+      "domain": "support",
+      "data": "object",
+      "title": {"en": "Urgency from a structured ticket", "pl": "Pilność ze zgłoszenia w formie obiektu"},
+      "expected": {"urgency": "3"},
+      "request": {
+        "en": {
+          "state": {"channel": "phone", "customer_tier": "enterprise", "opened": "2026-10-01 08:12",
+                    "message": "Nobody on our team can log in since 8:00 and payroll has to run today."},
+          "questions": {
+            "urgency": {"type": "score", "instructions": "How urgent is this ticket?",
+                        "criteria": ["Low: no deadline", "Normal: answer within two days", "High: answer today", "Critical: work is stopped and a deadline is today"]}
+          }
+        },
+        "pl": {
+          "state": {"kanał": "telefon", "poziom_klienta": "enterprise", "otwarte": "2026-10-01 08:12",
+                    "wiadomość": "Od 8:00 nikt z naszego zespołu nie może się zalogować, a dziś musimy wypłacić pensje."},
+          "questions": {
+            "urgency": {"type": "score", "instructions": "Jak pilne jest to zgłoszenie?",
+                        "criteria": ["Niska: brak terminu", "Normalna: odpowiedź w dwa dni", "Wysoka: odpowiedź dziś", "Krytyczna: praca stoi, a termin mija dziś"]}
+          }
+        }
+      }
+    },
+    {
+      "id": "finance-expense-policy",
+      "note": {"en": "The client divides the amount per person and day; the model applies the rule to the result.", "pl": "Kwotę na osobę i dzień liczy klient; model stosuje regułę do wyniku."},
+      "domain": "finance",
+      "data": "object",
+      "title": {"en": "Is an expense within policy?", "pl": "Czy wydatek mieści się w zasadach?"},
+      "expected": {"within_policy": "false"},
+      "request": {
+        "en": {
+          "state": {"policy": "Meals are reimbursed up to 50 EUR per person per day, with a receipt.",
+                    "claim": {"amount_eur": 140, "people": 2, "days": 1, "receipt": true, "per_person_per_day_eur": 70}},
+          "questions": {
+            "within_policy": {"type": "noul", "instructions": "The claim is within the policy."}
+          }
+        },
+        "pl": {
+          "state": {"zasady": "Posiłki są zwracane do 50 EUR na osobę dziennie, za okazaniem paragonu.",
+                    "wniosek": {"kwota_eur": 140, "osoby": 2, "dni": 1, "paragon": true, "na_osobę_dziennie_eur": 70}},
+          "questions": {
+            "within_policy": {"type": "noul", "instructions": "Wniosek mieści się w zasadach."}
+          }
+        }
+      }
+    },
+    {
+      "id": "finance-duplicate-payment",
+      "domain": "finance",
+      "data": "list",
+      "title": {"en": "Find the duplicate payment", "pl": "Znajdź zdublowaną płatność"},
+      "expected": {"duplicate": "t3"},
+      "request": {
+        "en": {
+          "state": [
+            {"id": "t1", "date": "2026-09-03", "payee": "Office Supply Co", "amount": "84.20 EUR"},
+            {"id": "t2", "date": "2026-09-03", "payee": "City Parking", "amount": "12.00 EUR"},
+            {"id": "t3", "date": "2026-09-03", "payee": "Office Supply Co", "amount": "84.20 EUR"},
+            {"id": "t4", "date": "2026-09-04", "payee": "Office Supply Co", "amount": "48.20 EUR"}
+          ],
+          "questions": {
+            "duplicate": {"type": "choice", "instructions": "Which transaction repeats an earlier one (same date, payee and amount)?",
+                          "criteria": {"t1": "Transaction t1", "t2": "Transaction t2", "t3": "Transaction t3", "t4": "Transaction t4"}}
+          }
+        },
+        "pl": {
+          "state": [
+            {"id": "t1", "data": "2026-09-03", "odbiorca": "Biuro-Mat sp. z o.o.", "kwota": "84,20 EUR"},
+            {"id": "t2", "data": "2026-09-03", "odbiorca": "Parking Miejski", "kwota": "12,00 EUR"},
+            {"id": "t3", "data": "2026-09-03", "odbiorca": "Biuro-Mat sp. z o.o.", "kwota": "84,20 EUR"},
+            {"id": "t4", "data": "2026-09-04", "odbiorca": "Biuro-Mat sp. z o.o.", "kwota": "48,20 EUR"}
+          ],
+          "questions": {
+            "duplicate": {"type": "choice", "instructions": "Która transakcja powtarza wcześniejszą (ta sama data, odbiorca i kwota)?",
+                          "criteria": {"t1": "Transakcja t1", "t2": "Transakcja t2", "t3": "Transakcja t3", "t4": "Transakcja t4"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "finance-delay-risk",
+      "domain": "finance",
+      "data": "text",
+      "title": {"en": "Payment delay risk on a scale", "pl": "Ryzyko opóźnienia płatności na skali"},
+      "request": {
+        "en": {
+          "state": "Note from the account manager: the client paid the last three invoices 20-30 days late, says a large customer of theirs has not paid them, and asks whether we accept instalments.",
+          "questions": {
+            "risk": {"type": "score", "instructions": "How likely is the next invoice to be paid late?",
+                     "criteria": ["Unlikely", "Possible", "Likely", "Almost certain"]}
+          }
+        },
+        "pl": {
+          "state": "Notatka opiekuna klienta: klient zapłacił ostatnie trzy faktury z opóźnieniem 20–30 dni, mówi, że jego duży odbiorca mu nie zapłacił, i pyta, czy przyjmiemy raty.",
+          "questions": {
+            "risk": {"type": "score", "instructions": "Jak prawdopodobne jest, że następna faktura zostanie zapłacona po terminie?",
+                     "criteria": ["Mało prawdopodobne", "Możliwe", "Prawdopodobne", "Prawie pewne"]}
+          }
+        }
+      }
+    },
+    {
+      "id": "law-notice-period",
+      "note": {"en": "The client computes the end date from the clause; the model checks the claim against it.", "pl": "Datę końca najmu liczy klient z klauzuli; model sprawdza z nią twierdzenie."},
+      "domain": "law",
+      "data": "object",
+      "title": {"en": "When does the lease end?", "pl": "Kiedy kończy się najem?"},
+      "expected": {"ends_10th": "false"},
+      "request": {
+        "en": {
+          "state": {"lease_clause_9": "The tenant may terminate with one month's notice, effective at the end of a calendar month.",
+                    "notice_given": "2026-03-10", "lease_ends": "2026-04-30"},
+          "questions": {
+            "ends_10th": {"type": "noul", "instructions": "The lease ends on 10 April 2026."}
+          }
+        },
+        "pl": {
+          "state": {"umowa_najmu_§9": "Najemca może wypowiedzieć umowę z miesięcznym wypowiedzeniem, ze skutkiem na koniec miesiąca kalendarzowego.",
+                    "wypowiedzenie_złożone": "2026-03-10", "najem_kończy_się": "2026-04-30"},
+          "questions": {
+            "ends_10th": {"type": "noul", "instructions": "Najem kończy się 10 kwietnia 2026 r."}
+          }
+        }
+      }
+    },
+    {
+      "id": "law-clause-type",
+      "domain": "law",
+      "data": "text",
+      "title": {"en": "Classify a contract clause", "pl": "Rodzaj klauzuli umownej"},
+      "expected": {"clause": "force_majeure"},
+      "request": {
+        "en": {
+          "state": "Neither party is liable for a delay caused by floods, strikes, war or other events beyond its reasonable control.",
+          "questions": {
+            "clause": {"type": "choice", "instructions": "What kind of clause is this?",
+                       "criteria": {"confidentiality": "Confidentiality", "force_majeure": "Force majeure", "termination": "Termination", "payment": "Payment terms"}}
+          }
+        },
+        "pl": {
+          "state": "Żadna ze stron nie odpowiada za opóźnienie spowodowane powodzią, strajkiem, wojną lub innym zdarzeniem, na które nie ma rozsądnego wpływu.",
+          "questions": {
+            "clause": {"type": "choice", "instructions": "Jaki to rodzaj klauzuli?",
+                       "criteria": {"confidentiality": "Poufność", "force_majeure": "Siła wyższa", "termination": "Wypowiedzenie umowy", "payment": "Warunki płatności"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "law-nda-event",
+      "note": {"en": "The client computes the end of the term from the signing date; the model compares dates and names the obligation.", "pl": "Koniec okresu obowiązywania liczy klient z daty zawarcia; model porównuje daty i wskazuje obowiązek."},
+      "domain": "law",
+      "data": "object",
+      "title": {"en": "An NDA and an incident: two questions", "pl": "Umowa o poufności i incydent: dwa pytania"},
+      "expected": {"in_term": "true", "obligation": "confidentiality"},
+      "request": {
+        "en": {
+          "state": {"agreement": "Non-disclosure agreement", "signed": "2025-05-12", "term_years": 2, "in_force_until": "2027-05-12",
+                    "event": {"date": "2026-08-30", "what": "The supplier sent the client's price list to a competitor."}},
+          "questions": {
+            "in_term": {"type": "noul", "instructions": "The event happened while the agreement was in force."},
+            "obligation": {"type": "choice", "instructions": "Which obligation does the event concern?",
+                           "criteria": {"confidentiality": "Keeping information secret", "non_compete": "Not competing", "payment": "Paying on time", "ip": "Intellectual property"}}
+          }
+        },
+        "pl": {
+          "state": {"umowa": "Umowa o zachowaniu poufności", "zawarta": "2025-05-12", "okres_lat": 2, "obowiązuje_do": "2027-05-12",
+                    "zdarzenie": {"data": "2026-08-30", "opis": "Dostawca wysłał cennik klienta konkurencji."}},
+          "questions": {
+            "in_term": {"type": "noul", "instructions": "Zdarzenie miało miejsce w okresie obowiązywania umowy."},
+            "obligation": {"type": "choice", "instructions": "Którego obowiązku dotyczy zdarzenie?",
+                           "criteria": {"confidentiality": "Zachowanie informacji w tajemnicy", "non_compete": "Zakaz konkurencji", "payment": "Terminowa zapłata", "ip": "Własność intelektualna"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "logistics-next-step",
+      "domain": "logistics",
+      "data": "object",
+      "title": {"en": "Next step for a parcel", "pl": "Następny krok dla przesyłki"},
+      "expected": {"action": "contact_customer"},
+      "request": {
+        "en": {
+          "state": {"order": "A-5531", "shipped": "2026-09-22",
+                    "carrier_events": ["2026-09-23 in transit", "2026-09-24 delivery attempt failed: address not found", "2026-09-26 returned to sender"]},
+          "questions": {
+            "action": {"type": "choice", "instructions": "What should the shop do next?",
+                       "criteria": {"contact_customer": "Ask the customer to confirm the address", "reship": "Send the parcel again to the same address", "refund": "Refund the order", "wait": "Wait for the carrier"}}
+          }
+        },
+        "pl": {
+          "state": {"zamówienie": "A-5531", "wysłane": "2026-09-22",
+                    "zdarzenia_przewoźnika": ["2026-09-23 w drodze", "2026-09-24 nieudana próba doręczenia: nie znaleziono adresu", "2026-09-26 zwrot do nadawcy"]},
+          "questions": {
+            "action": {"type": "choice", "instructions": "Co sklep powinien zrobić teraz?",
+                       "criteria": {"contact_customer": "Poprosić klienta o potwierdzenie adresu", "reship": "Wysłać paczkę ponownie na ten sam adres", "refund": "Zwrócić pieniądze za zamówienie", "wait": "Czekać na przewoźnika"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "logistics-truck-load",
+      "note": {"en": "The client adds the weights up; the model only compares the total with the limit. Without the total see “Limit of the model: adding up”.", "pl": "Wagi sumuje klient; model tylko porównuje sumę z limitem. Bez sumy zobacz „Granica modelu: dodawanie”."},
+      "domain": "logistics",
+      "data": "list",
+      "title": {"en": "Does the load fit the truck?", "pl": "Czy ładunek zmieści się w limicie?"},
+      "expected": {"fits": "true"},
+      "request": {
+        "en": {
+          "state": {"truck_limit_kg": 1200,
+                    "pallets": [{"id": "P1", "kg": 310}, {"id": "P2", "kg": 285}, {"id": "P3", "kg": 240}, {"id": "P4", "kg": 335}],
+                    "pallets_total_kg": 1170},
+          "questions": {
+            "fits": {"type": "noul", "instructions": "The four pallets together stay within the truck limit."}
+          }
+        },
+        "pl": {
+          "state": {"limit_auta_kg": 1200,
+                    "palety": [{"id": "P1", "kg": 310}, {"id": "P2", "kg": 285}, {"id": "P3", "kg": 240}, {"id": "P4", "kg": 335}],
+                    "palety_razem_kg": 1170},
+          "questions": {
+            "fits": {"type": "noul", "instructions": "Cztery palety razem mieszczą się w limicie auta."}
+          }
+        }
+      }
+    },
+    {
+      "id": "limit-adding-up",
+      "note": {"en": "The same case as “Does the load fit the truck?” but without the total: the model has to add four numbers itself and usually gets it wrong. A decision model compares and applies rules in one pass; arithmetic belongs to the client — send the computed values with the data.",
+               "pl": "Ten sam przypadek co „Czy ładunek zmieści się w limicie?”, ale bez sumy: model musi sam dodać cztery liczby i zwykle się myli. Model decyzyjny porównuje i stosuje reguły w jednym przebiegu; rachunki należą do klienta — wysyłaj policzone wartości razem z danymi."},
+      "domain": "logistics",
+      "data": "list",
+      "title": {"en": "Limit of the model: adding up", "pl": "Granica modelu: dodawanie"},
+      "request": {
+        "en": {
+          "state": {"truck_limit_kg": 1200,
+                    "pallets": [{"id": "P1", "kg": 310}, {"id": "P2", "kg": 285}, {"id": "P3", "kg": 240}, {"id": "P4", "kg": 335}]},
+          "questions": {
+            "fits": {"type": "noul", "instructions": "The four pallets together stay within the truck limit."}
+          }
+        },
+        "pl": {
+          "state": {"limit_auta_kg": 1200,
+                    "palety": [{"id": "P1", "kg": 310}, {"id": "P2", "kg": 285}, {"id": "P3", "kg": 240}, {"id": "P4", "kg": 335}]},
+          "questions": {
+            "fits": {"type": "noul", "instructions": "Cztery palety razem mieszczą się w limicie auta."}
+          }
+        }
+      }
+    },
+    {
+      "id": "hr-leave-type",
+      "domain": "hr",
+      "data": "text",
+      "title": {"en": "Type of leave request", "pl": "Rodzaj wniosku urlopowego"},
+      "expected": {"leave": "vacation"},
+      "request": {
+        "en": {
+          "state": "Hi Anna, I'd like to take next Friday off for my sister's wedding. I still have 9 days left this year.",
+          "questions": {
+            "leave": {"type": "choice", "instructions": "What kind of leave is requested?",
+                      "criteria": {"vacation": "Annual leave", "sick": "Sick leave", "parental": "Parental leave", "unpaid": "Unpaid leave"}}
+          }
+        },
+        "pl": {
+          "state": "Cześć Aniu, chciałbym wziąć wolny przyszły piątek na ślub siostry. Zostało mi jeszcze 9 dni w tym roku.",
+          "questions": {
+            "leave": {"type": "choice", "instructions": "O jaki rodzaj nieobecności chodzi?",
+                      "criteria": {"vacation": "Urlop wypoczynkowy", "sick": "Zwolnienie lekarskie", "parental": "Urlop rodzicielski", "unpaid": "Urlop bezpłatny"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "hr-candidate-match",
+      "domain": "hr",
+      "data": "object",
+      "title": {"en": "Candidate fit on a scale", "pl": "Dopasowanie kandydata na skali"},
+      "request": {
+        "en": {
+          "state": {"requirements": ["3+ years of Python", "SQL", "fluent English", "experience with payments"],
+                    "candidate": {"python_years": 4, "sql": true, "english": "C1", "payments": false, "other": "Led a team of three"}},
+          "questions": {
+            "fit": {"type": "score", "instructions": "How well does the candidate meet the requirements?",
+                    "criteria": ["Does not meet them", "Meets some", "Meets most", "Meets all"]}
+          }
+        },
+        "pl": {
+          "state": {"wymagania": ["3+ lata Pythona", "SQL", "biegły angielski", "doświadczenie z płatnościami"],
+                    "kandydat": {"python_lata": 4, "sql": true, "angielski": "C1", "płatności": false, "inne": "Prowadził zespół trzech osób"}},
+          "questions": {
+            "fit": {"type": "score", "instructions": "W jakim stopniu kandydat spełnia wymagania?",
+                    "criteria": ["Nie spełnia", "Spełnia niektóre", "Spełnia większość", "Spełnia wszystkie"]}
+          }
+        }
+      }
+    },
+    {
+      "id": "it-incident-category",
+      "domain": "it",
+      "data": "text",
+      "title": {"en": "Categorise a log line", "pl": "Kategoria wpisu w logu"},
+      "expected": {"category": "storage"},
+      "request": {
+        "en": {
+          "state": "2026-10-01T03:14:07Z ERROR backup-job: write failed on /var/backups (no space left on device, 98% used)",
+          "questions": {
+            "category": {"type": "choice", "instructions": "Which area does this incident belong to?",
+                         "criteria": {"network": "Network and DNS", "storage": "Disks and storage", "auth": "Logins and permissions", "application": "Application bugs"}}
+          }
+        },
+        "pl": {
+          "state": "2026-10-01T03:14:07Z ERROR backup-job: zapis na /var/backups nieudany (brak miejsca na urządzeniu, zajęte 98%)",
+          "questions": {
+            "category": {"type": "choice", "instructions": "Którego obszaru dotyczy ten incydent?",
+                         "criteria": {"network": "Sieć i DNS", "storage": "Dyski i pamięć masowa", "auth": "Logowanie i uprawnienia", "application": "Błędy aplikacji"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "it-restarts",
+      "domain": "it",
+      "data": "list",
+      "title": {"en": "Read a table of services", "pl": "Odczyt z tabeli usług"},
+      "expected": {"flapping": "true"},
+      "request": {
+        "en": {
+          "state": [
+            {"service": "api", "restarts_last_hour": 1, "status": "running"},
+            {"service": "worker", "restarts_last_hour": 5, "status": "running"},
+            {"service": "db", "restarts_last_hour": 0, "status": "running"}
+          ],
+          "questions": {
+            "flapping": {"type": "noul", "instructions": "At least one service restarted more than 3 times in the last hour."}
+          }
+        },
+        "pl": {
+          "state": [
+            {"usługa": "api", "restarty_w_ostatniej_godzinie": 1, "stan": "działa"},
+            {"usługa": "worker", "restarty_w_ostatniej_godzinie": 5, "stan": "działa"},
+            {"usługa": "db", "restarty_w_ostatniej_godzinie": 0, "stan": "działa"}
+          ],
+          "questions": {
+            "flapping": {"type": "noul", "instructions": "Co najmniej jedna usługa uruchamiała się ponownie więcej niż 3 razy w ostatniej godzinie."}
+          }
+        }
+      }
+    },
+    {
+      "id": "commerce-review-stars",
+      "domain": "commerce",
+      "data": "text",
+      "title": {"en": "Stars for a mixed review", "pl": "Gwiazdki dla mieszanej opinii"},
+      "request": {
+        "en": {
+          "state": "Arrived three days late and the box was crushed, but the headphones themselves sound great and the battery lasts all week.",
+          "questions": {
+            "stars": {"type": "score", "instructions": "How many stars would this reviewer most likely give?",
+                      "criteria": ["1 star", "2 stars", "3 stars", "4 stars", "5 stars"]}
+          }
+        },
+        "pl": {
+          "state": "Przyszły trzy dni po terminie, a pudełko było zgniecione, ale same słuchawki grają świetnie, a bateria wytrzymuje cały tydzień.",
+          "questions": {
+            "stars": {"type": "score", "instructions": "Ile gwiazdek najpewniej wystawi autor tej opinii?",
+                      "criteria": ["1 gwiazdka", "2 gwiazdki", "3 gwiazdki", "4 gwiazdki", "5 gwiazdek"]}
+          }
+        }
+      }
+    },
+    {
+      "id": "commerce-many-categories",
+      "domain": "commerce",
+      "data": "text",
+      "title": {"en": "20 categories (more than one pass)", "pl": "20 kategorii (więcej niż jeden przebieg)"},
+      "expected": {"category": "kitchen"},
+      "request": {
+        "en": {
+          "state": "Stainless steel French press, 1 litre, double wall keeps coffee hot, dishwasher safe.",
+          "questions": {
+            "category": {"type": "choice", "instructions": "Which shop category does the product belong to?",
+                         "criteria": {"kitchen": "Kitchen and dining", "garden": "Garden", "tools": "Tools and DIY", "toys": "Toys", "books": "Books", "phones": "Phones", "computers": "Computers", "audio": "Audio", "tv": "TV and video", "fashion": "Clothing", "shoes": "Shoes", "beauty": "Beauty", "sports": "Sports", "auto": "Car accessories", "pets": "Pet supplies", "baby": "Baby", "office": "Office", "music": "Musical instruments", "food": "Food and drinks", "furniture": "Furniture"}}
+          }
+        },
+        "pl": {
+          "state": "Zaparzacz do kawy (french press) ze stali nierdzewnej, 1 litr, podwójna ścianka utrzymuje ciepło, można myć w zmywarce.",
+          "questions": {
+            "category": {"type": "choice", "instructions": "Do której kategorii sklepu należy produkt?",
+                         "criteria": {"kitchen": "Kuchnia i jadalnia", "garden": "Ogród", "tools": "Narzędzia i majsterkowanie", "toys": "Zabawki", "books": "Książki", "phones": "Telefony", "computers": "Komputery", "audio": "Audio", "tv": "RTV i wideo", "fashion": "Odzież", "shoes": "Obuwie", "beauty": "Uroda", "sports": "Sport", "auto": "Akcesoria samochodowe", "pets": "Dla zwierząt", "baby": "Dla dzieci", "office": "Biuro", "music": "Instrumenty muzyczne", "food": "Żywność i napoje", "furniture": "Meble"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "travel-delay-compensation",
+      "note": {"en": "The client converts the delay to hours, the unit of the rule; the model judges the cause and applies the rule.", "pl": "Opóźnienie w godzinach, jednostce reguły, liczy klient; model ocenia przyczynę i stosuje regułę."},
+      "domain": "travel",
+      "data": "object",
+      "title": {"en": "Apply a rule to a flight", "pl": "Zastosuj regułę do lotu"},
+      "expected": {"compensation": "true"},
+      "request": {
+        "en": {
+          "state": {"rule": "Passengers are compensated when the arrival delay is 3 hours or more and the cause is not an extraordinary circumstance (such as weather or air traffic control strikes).",
+                    "flight": {"number": "XY 418", "arrival_delay_minutes": 195, "arrival_delay_hours": 3.25, "cause": "crew shortage"}},
+          "questions": {
+            "compensation": {"type": "noul", "instructions": "The passengers of this flight are entitled to compensation."}
+          }
+        },
+        "pl": {
+          "state": {"reguła": "Pasażerom przysługuje odszkodowanie, gdy opóźnienie przylotu wynosi co najmniej 3 godziny, a przyczyną nie są nadzwyczajne okoliczności (np. pogoda lub strajk kontroli ruchu lotniczego).",
+                    "lot": {"numer": "XY 418", "opóźnienie_przylotu_min": 195, "opóźnienie_przylotu_godz": 3.25, "przyczyna": "brak załogi"}},
+          "questions": {
+            "compensation": {"type": "noul", "instructions": "Pasażerom tego lotu przysługuje odszkodowanie."}
+          }
+        }
+      }
+    },
+    {
+      "id": "travel-intent",
+      "domain": "travel",
+      "data": "text",
+      "title": {"en": "What does the traveller want?", "pl": "Czego chce podróżny?"},
+      "expected": {"intent": "assistance"},
+      "request": {
+        "en": {
+          "state": "My mother uses a wheelchair. Can someone help her from the check-in desk to the plane on Saturday?",
+          "questions": {
+            "intent": {"type": "choice", "instructions": "What is the request about?",
+                       "criteria": {"change": "Changing the booking", "cancel": "Cancelling the trip", "baggage": "Baggage", "assistance": "Help for a passenger with reduced mobility"}}
+          }
+        },
+        "pl": {
+          "state": "Moja mama porusza się na wózku. Czy ktoś może jej pomóc dojść od stanowiska odprawy do samolotu w sobotę?",
+          "questions": {
+            "intent": {"type": "choice", "instructions": "Czego dotyczy prośba?",
+                       "criteria": {"change": "Zmiana rezerwacji", "cancel": "Rezygnacja z podróży", "baggage": "Bagaż", "assistance": "Pomoc dla pasażera o ograniczonej sprawności ruchowej"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "moderation-personal-data",
+      "domain": "moderation",
+      "data": "text",
+      "title": {"en": "Does a post reveal personal data?", "pl": "Czy wpis ujawnia dane osobowe?"},
+      "expected": {"personal_data": "false"},
+      "request": {
+        "en": {
+          "state": "If you have questions about the event, call the town hall's information line listed on the official website.",
+          "questions": {
+            "personal_data": {"type": "noul", "instructions": "The post reveals a private person's phone number or address."}
+          }
+        },
+        "pl": {
+          "state": "Jeśli masz pytania o wydarzenie, zadzwoń na infolinię urzędu miasta podaną na oficjalnej stronie.",
+          "questions": {
+            "personal_data": {"type": "noul", "instructions": "Wpis ujawnia numer telefonu lub adres osoby prywatnej."}
+          }
+        }
+      }
+    },
+    {
+      "id": "clinic-route-request",
+      "domain": "clinic",
+      "data": "text",
+      "title": {"en": "Route a patient message (no diagnosis)", "pl": "Przydział wiadomości pacjenta (bez diagnozy)"},
+      "expected": {"route": "prescription"},
+      "request": {
+        "en": {
+          "state": "Good morning, I need a new prescription for the same medication I take every month. My last one ran out yesterday.",
+          "questions": {
+            "route": {"type": "choice", "instructions": "Which front-desk queue should the message go to?",
+                      "criteria": {"appointment": "Booking a new appointment", "prescription": "Prescription renewal", "results": "Test results", "billing": "Invoices and payments"}}
+          }
+        },
+        "pl": {
+          "state": "Dzień dobry, potrzebuję nowej recepty na ten sam lek, który biorę co miesiąc. Poprzednia skończyła się wczoraj.",
+          "questions": {
+            "route": {"type": "choice", "instructions": "Do której kolejki rejestracji powinna trafić wiadomość?",
+                      "criteria": {"appointment": "Umówienie nowej wizyty", "prescription": "Przedłużenie recepty", "results": "Wyniki badań", "billing": "Faktury i płatności"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "clinic-referral-valid",
+      "note": {"en": "The client adds the 90 days to the issue date; the model compares the visit date with the result.", "pl": "90 dni do daty wystawienia dodaje klient; model porównuje z wynikiem datę wizyty."},
+      "domain": "clinic",
+      "data": "object",
+      "title": {"en": "Is a referral still valid?", "pl": "Czy skierowanie jest jeszcze ważne?"},
+      "expected": {"valid": "false"},
+      "request": {
+        "en": {
+          "state": {"referral_issued": "2026-03-02", "valid_for_days": 90, "valid_until": "2026-05-31", "visit_date": "2026-06-15"},
+          "questions": {
+            "valid": {"type": "noul", "instructions": "The referral is still valid on the visit date."}
+          }
+        },
+        "pl": {
+          "state": {"skierowanie_wystawione": "2026-03-02", "ważne_dni": 90, "ważne_do": "2026-05-31", "data_wizyty": "2026-06-15"},
+          "questions": {
+            "valid": {"type": "noul", "instructions": "Skierowanie jest ważne w dniu wizyty."}
+          }
+        }
+      }
+    }
+  ]
+}
