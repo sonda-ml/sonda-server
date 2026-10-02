@@ -19,6 +19,38 @@ about a piece of evidence in one forward pass, with calibrated probabilities.
 * the TypeSafe-style `/v1/systemone` API, and a prompt token-identical to the one the models were trained on
   (checked against recorded reference outputs).
 
+
+## Installation
+
+**Requirements:** Linux with an NVIDIA GPU and CUDA, Python 3.11 or newer, and about 10 GB of GPU memory for a 4B
+model in bf16 (about 9 GB of weights plus the activations of each forward).
+
+```bash
+git clone <repository-url> sonda
+cd sonda
+python -m venv .venv
+.venv/bin/pip install -e ".[gpu]"     # the server, PyTorch and transformers (>= 5.0, which loads Qwen3.5)
+.venv/bin/sonda-server --version      # sonda-server 0.1.0
+```
+
+**Already have a CUDA build of PyTorch** (an NVIDIA container, or an ARM machine such as the GB10 where pip may not
+find a matching build)? Install without the extra, so that build is kept:
+
+```bash
+.venv/bin/pip install -e .            # fastapi, uvicorn, orjson, pydantic, numpy only
+```
+
+To reuse PyTorch and transformers from another virtual environment instead, see
+[docs/OPERATIONS.md](docs/OPERATIONS.md#environment).
+
+**A model:** sonda-server serves a local model folder holding the weights (`model.safetensors`), the tokenizer and,
+optionally, the calibration `sonda.conf`. To fetch one from Hugging Face:
+
+```bash
+huggingface-cli download <model-repo> --local-dir models/<model-name>
+```
+
+
 ## Quick start
 
 ```bash
