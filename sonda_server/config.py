@@ -25,6 +25,8 @@ from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 
 CONFIG_FILE = "sonda.conf"
+# --typesafe-compat: the requests TypeSafe's API takes that the default validation refuses (see schemas.py)
+TYPESAFE_MAX_QUESTIONS = 64
 
 
 @dataclass(frozen=True)
@@ -74,6 +76,9 @@ class Settings:
     port: int = 8090
     device: str = "cuda"
     method: str = "knockout"             # more than 16 options: knockout or tree (spread.py)
+    engine: str = "transformers"         # transformers (model.py) or vllm (vllm_model.py)
+    gpu_memory_utilization: float = 0.25  # vllm only: share of the GPU memory vLLM may take (weights + cache)
+    vllm_args: str = ""                  # vllm only: JSON object of further vLLM engine arguments, e.g. {"quantization": "fp8"}
 
     # limits (input validation)
     max_body_bytes: int = 2_000_000
@@ -97,6 +102,7 @@ class Settings:
     input_validation: bool = True
     output_filter: bool = True
     expose_temperature: bool = False
+    typesafe_compat: bool = False        # accept what TypeSafe's API accepts: empty evidence, any question id, 64 questions
 
     # the page with API examples and the game at GET / (web/index.html)
     demo: bool = True
@@ -112,6 +118,11 @@ class Settings:
     @property
     def model_name(self) -> str:
         return self.name or Path(self.model).name
+
+    @property
+    def question_limit(self) -> int:
+        """Questions per request: max_questions, at least TYPESAFE_MAX_QUESTIONS with --typesafe-compat."""
+        return max(self.max_questions, TYPESAFE_MAX_QUESTIONS) if self.typesafe_compat else self.max_questions
 
     @classmethod
     def from_env(cls, environ: dict | None = None, **overrides) -> "Settings":

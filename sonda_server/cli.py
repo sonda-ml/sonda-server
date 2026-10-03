@@ -29,7 +29,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--name", help="model name reported in answers (default: the folder name)")
     ap.add_argument("--host")
     ap.add_argument("--port", type=int)
-    ap.add_argument("--device", help="CUDA device, e.g. cuda or cuda:1")
+    ap.add_argument("--device", help="CUDA device, e.g. cuda or cuda:1 (transformers engine)")
+    ap.add_argument("--engine", choices=["transformers", "vllm"],
+                    help="what runs the model: transformers (default) or vLLM (needs vllm installed)")
+    ap.add_argument("--gpu-memory-utilization", type=float,
+                    help="vllm engine: share of the GPU memory vLLM may take (default 0.25)")
+    ap.add_argument("--vllm-args", help='vllm engine: JSON object of further vLLM engine arguments, '
+                                        'e.g. \'{"quantization": "fp8"}\'')
     ap.add_argument("--method", choices=["knockout", "tree"], help="reading more than 16 options")
     group = ap.add_argument_group("limits")
     for name, kind in (("max-body-bytes", int), ("max-state-chars", int), ("max-questions", int),
@@ -45,6 +51,9 @@ def build_parser() -> argparse.ArgumentParser:
                        help="check only what the prompt needs")
     group.add_argument("--no-output-filter", dest="output_filter", action="store_false", default=None,
                        help="return answers without the per-field filter")
+    group.add_argument("--typesafe-compat", action="store_true", default=None,
+                       help="accept what TypeSafe's API accepts and the default refuses: an empty state, question ids "
+                            "of 1-128 characters (not only letters, digits, _ . -), at least 64 questions per request")
     group.add_argument("--expose-temperature", action="store_true", default=None,
                        help="add the temperature used to every answer")
     ap.add_argument("--no-demo", dest="demo", action="store_false", default=None,
@@ -64,6 +73,16 @@ def build_parser() -> argparse.ArgumentParser:
 def settings_from_args(argv: list[str] | None = None) -> Settings:
     args = vars(build_parser().parse_args(argv))
     return Settings.from_env(**{key: value for key, value in args.items() if value is not None})
+
+
+def vllm_args(text: str) -> dict:
+    """The --vllm-args JSON object (empty when unset)."""
+    if not text.strip():
+        return {}
+    value = json.loads(text)
+    if not isinstance(value, dict):
+        raise SystemExit("--vllm-args must be a JSON object, e.g. '{\"quantization\": \"fp8\"}'")
+    return value
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -90,6 +109,9 @@ def main(argv: list[str] | None = None) -> int:
         log.warning("input validation is OFF (--no-input-validation): only what the prompt needs is checked")
     if not settings.output_filter:
         log.warning("output filter is OFF (--no-output-filter): answers are returned unfiltered")
+    if settings.typesafe_compat:
+        log.warning(f"TypeSafe compatibility is ON (--typesafe-compat): empty evidence allowed, question ids of 1-128 "
+                    f"characters, up to {settings.question_limit} questions per request")
     if settings.host not in ("127.0.0.1", "localhost", "::1"):
         if not os.environ.get(settings.api_key_env):
             log.warning(f"listening on {settings.host} without an API key ({settings.api_key_env} is not set): "
@@ -98,7 +120,13 @@ def main(argv: list[str] | None = None) -> int:
             log.warning("the API key travels in clear text over plain HTTP: put a TLS reverse proxy or an SSH tunnel "
                         "in front when clients are on other machines")
 
-    model = LetterModel(settings.model, device=settings.device, bucket=settings.bucket)
+    if settings.engine == "vllm":
+        from .vllm_model import VllmLetterModel  # noqa: PLC0415
+        model = VllmLetterModel(settings.model, max_model_len=settings.max_input_tokens + 16,
+                                gpu_memory_utilization=settings.gpu_memory_utilization,
+                                extra=vllm_args(settings.vllm_args))
+    else:
+        model = LetterModel(settings.model, device=settings.device, bucket=settings.bucket)
     metrics = Metrics()
     batcher = Batcher(model.letter_logits, settings, metrics)
     engine = Engine(model.tokenizer, batcher.read, config, settings)
@@ -110,9 +138,12 @@ def main(argv: list[str] | None = None) -> int:
     signal.signal(signal.SIGHUP, reload_on_hup)
     log.info(json.dumps({"event": "start", "server": "sonda-server", "version": __version__,
                          "model": settings.model_name, "url": f"http://{settings.host}:{settings.port}/v1/systemone",
+                         "engine": settings.engine,
+                         **({"vllm_args": vllm_args(settings.vllm_args)} if settings.engine == "vllm" else {}),
                          "demo": f"http://{settings.host}:{settings.port}/" if settings.demo else None,
                          "calibration": config.as_dict(),
-                         "validation": {"input": settings.input_validation, "output": settings.output_filter}}))
+                         "validation": {"input": settings.input_validation, "output": settings.output_filter,
+                                        "typesafe_compat": settings.typesafe_compat}}))
     # The readiness line: scripts that start the server can wait for it.
     print(f"serving {settings.model} on http://{settings.host}:{settings.port}/v1/systemone", flush=True)
     uvicorn.run(app, host=settings.host, port=settings.port, log_level="warning", access_log=False)

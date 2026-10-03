@@ -1,11 +1,12 @@
 # sonda-server
 
-
 A `/v1/systemone` decision server for sonda models: models that answer typed questions — yes/no, choice, score —
 about a piece of evidence in one forward pass, with calibrated probabilities.
 
 * **many clients at once:** an async HTTP server and dynamic batching — prompts from all concurrent requests
   share forwards on the GPU instead of waiting in line one by one;
+* **two engines:** transformers (default) or [vLLM](https://github.com/vllm-project/vllm) (`--engine vllm`, or the
+  Docker image below) — same answers, several times the throughput with many clients;
 * **request validation:** a closed schema and limits; an invalid request is rejected whole with every error
   and its location, before the model sees it;
 * **answer filtering:** every answer field is checked; invalid fields are dropped without an error, an answer
@@ -17,8 +18,9 @@ about a piece of evidence in one forward pass, with calibrated probabilities.
 * metrics, an optional API key (with a key set, the API, model info and metrics need it), a Host allow-list and a
   refusal of POSTs from other web pages; startup switches to turn validation off;
 * the TypeSafe-style `/v1/systemone` API, and a prompt token-identical to the one the models were trained on
-  (checked against recorded reference outputs).
-
+  (checked against recorded reference outputs); `--typesafe-compat` also takes the requests TypeSafe's API takes
+  and the stricter default refuses (empty evidence, free-form question ids, up to 64 questions), e.g. to run the
+  Decision Index suite.
 
 ## Installation
 
@@ -33,15 +35,18 @@ python -m venv .venv
 .venv/bin/sonda-server --version      # sonda-server 0.1.0
 ```
 
-**Already have a CUDA build of PyTorch** (an NVIDIA container, or an ARM machine such as the GB10 where pip may not
-find a matching build)? Install without the extra, so that build is kept:
+**Already have a CUDA build of PyTorch** installed system-wide (an NVIDIA container, or an ARM machine such as the
+GB10, where PyPI may not offer a CUDA build)? Let the environment see it and install without the extra, so pip does
+not download a second, possibly mismatched PyTorch:
 
 ```bash
-.venv/bin/pip install -e .            # fastapi, uvicorn, orjson, pydantic, numpy only
+python -m venv --system-site-packages .venv
+.venv/bin/pip install -e .            # fastapi, uvicorn, orjson, pydantic, numpy; PyTorch comes from the system
+.venv/bin/python -c "import torch, transformers; print(torch.cuda.is_available(), transformers.__version__)"
 ```
 
-To reuse PyTorch and transformers from another virtual environment instead, see
-[docs/OPERATIONS.md](docs/OPERATIONS.md#environment).
+The check should print `True` and a transformers version of 5.0 or newer. To reuse PyTorch and transformers from
+another virtual environment instead, see [docs/OPERATIONS.md](docs/OPERATIONS.md#environment).
 
 **A model:** sonda-server serves a local model folder holding the weights (`model.safetensors`), the tokenizer and,
 optionally, the calibration `sonda.conf`. To fetch one from Hugging Face:
@@ -50,11 +55,27 @@ optionally, the calibration `sonda.conf`. To fetch one from Hugging Face:
 huggingface-cli download <model-repo> --local-dir models/<model-name>
 ```
 
+**For the tests:** `.venv/bin/pip install -e ".[test]"`.
+
+### Docker with vLLM
+
+The image builds on the official vLLM image and runs sonda-server with the vLLM engine; the model folder is mounted,
+not copied:
+
+```bash
+docker build -f docker/Dockerfile.vllm -t sonda-server:vllm .
+docker run --rm --device nvidia.com/gpu=all --ipc=host -p 127.0.0.1:8090:8090 \
+    -v /path/to/model:/model:ro -e SONDA_NAME=<model-name> sonda-server:vllm
+```
+
+`--device nvidia.com/gpu=all` needs the NVIDIA Container Toolkit (CDI); with the older runtime use `--gpus all`.
+vLLM takes `SONDA_GPU_MEMORY_UTILIZATION` (default 0.25) of the GPU memory for the weights and its cache and needs a
+few minutes to start (kernel tuning, CUDA graphs). Every other option works as `-e SONDA_<OPTION>=...`.
 
 ## Quick start
 
 ```bash
-sonda-server --model /path/to/model --port 8090
+.venv/bin/sonda-server --model models/<model-name> --port 8090
 
 curl -s localhost:8090/v1/systemone -d '{
   "state": "Order 7120 was delivered 12 days ago; the customer asks for a refund.",
@@ -66,7 +87,6 @@ Then open http://localhost:8090/ for examples to edit and send, and the game.
 ## Screenshots
 
 The page at `/`, served by sonda-server with a 4B Polish/English decision model on one GPU.
-
 
 **Examples** — edit a request, send it, and see every answer as probabilities, with the same request as `curl`,
 Python and JavaScript code:

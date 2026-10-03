@@ -386,27 +386,29 @@ const T = {
     play: "Start", resume: "Resume", pause: "Pause", gameOver: "Game over", paused: "Paused",
     pressStart: "Space or an arrow to start", modelStart: "Space or the button: the model plays", letModelPlay: "Let the model play",
     hitWall: "The snake hit the wall.", hitSelf: "The snake bit its own tail.", modelError: "The model did not answer — {msg}",
+    boardFull: "The snake fills the whole board: nothing left to eat.",
+    forcedMoves: "Moves without a choice, made without asking the model: {n}",
     lastDecision: "The model's last decision", requestShown: "The request sent to the model",
     snakeKeys: "Arrows or WASD steer, Space pauses. On a phone: swipe on the board or use the buttons.",
-    snakeModelIntro: "The model steers. Before every step this page works out, for each direction, whether it is safe, how far the food would be and how many free cells would be left, and asks the model one choice question: the code computes, the model decides.",
-    snakeRawIntro: "The model gets only the board as rows of text and has to work the move out itself — much harder for a model that answers in a single pass. Compare it with the other model mode.",
-    snakeAsk: "Which way should the snake move? A move that is not safe ends the game. Among safe moves take one that eats the food or gets closer to it, but never one that leaves far fewer free cells than the others.",
-    snakeAskRaw: "Which way should the snake (H) move to reach the food (F) without hitting a wall or its own body (o)?",
+    snakeModelIntro: "The model steers. Before every step this page offers it only the safe directions: after them the head can still reach the tail, so the snake can always follow its tail and never gets trapped. For each one it works out whether the move eats, how far the food is along the free cells, whether the snake could eat it and still reach its tail, and how long the way to the tail is; the model picks one with a single choice question. With one safe direction the snake takes it without asking: the code keeps the snake safe, the model decides where it goes.",
+    snakeRawIntro: "The model gets only the board as rows of text and has to work the move out itself — much harder for a model that answers in a single pass. It is offered only the safe directions, so it cannot crash either. Compare it with the other model mode.",
+    snakeAsk: "Which way should the snake move? Every move offered is safe. Take the one that eats the food. Otherwise take a move from which the snake can safely reach the food, the one closest to it. If no move has a safe way to the food, take the one with the longest way to the tail: it buys time until the body moves out of the way.",
+    snakeAskRaw: "Which way should the snake (H) move to reach the food (F)? Every direction offered is safe.",
     snakeLegend: "H head, o body, F food, . empty; row 0 is the top, column 0 the left edge",
     dir_up: "up", dir_down: "down", dir_left: "left", dir_right: "right",
-    snakeFields: {safe: "safe", eats: "eats_food", distance: "distance_to_food", room: "free_cells_after", length: "length",
+    snakeFields: {eats: "eats_food", distance: "distance_to_food", foodSafe: "food_reachable_safely", tail: "way_to_tail", length: "length",
                   moves: "moves", legend: "legend", board: "board", direction: "direction"},
     tetrisFields: {piece: "piece", heights: "column_heights", holes: "holes"},
     tetrisAsk: "Where should the piece go? Best: no new holes, then more cleared lines, then a lower and flatter stack.",
     placement: "clears {lines} lines, {holes} new holes, height {height}, bumpiness {bumps}",
-    tetrisModelIntro: "The model plays. For every piece this page computes each placement and its effect, offers the model the 5 best by a classic heuristic in random order, and the model picks one. “Agrees” counts how often it picked the heuristic's favourite.",
+    tetrisModelIntro: "The model plays. For every piece this page computes each placement and its effect and rates it with the El-Tetris evaluation. It offers the model, in random order, up to 5 placements rated close to the best: more of them while the stack is low, only the best once it is high — so that even the weakest offered choice does not lose (simulated: 0 game overs in 400,000 pieces). With a single placement left the piece goes there without asking. “Agrees” counts how often the model picked the best-rated one.",
     tetrisKeys: "← → move, ↑ or X rotate, Z rotate back, ↓ faster, Space drops, P pauses.",
     pacTitle: "Pac-Man", lives: "Lives", dotsLeft: "Dots left", caught: "A ghost caught Pac-Man.",
     levelUp: "Level {n}: the maze is full again.",
     pacKeys: "Arrows or WASD steer, Space pauses. On a phone: swipe on the board or use the buttons.",
-    pacModelIntro: "The model steers. Ghosts move a step per turn, so the game waits for the model. Before every step this page works out, for each way, how far the nearest ghost would be (along the maze), how many cells Pac-Man would still reach before any ghost, what the move eats and how far the nearest dot would be, and asks the model one choice question.",
-    pacAsk: "Which way should Pac-Man go? A move that is not safe can cost a life; if no move is safe, take the one with the most free cells. Among safe moves take one that eats something, otherwise the one closest to a dot; while ghosts are frightened, catching one is worth the most.",
-    pacFields: {safe: "safe", ghost: "ghost_distance", room: "free_cells", eats: "eats", dot: "distance_to_dot", prey: "frightened_ghost_distance",
+    pacModelIntro: "The model steers. Ghosts move a step per turn, so the game waits for the model. Each ghost draws its random moves from its own seeded generator, so — as with the original game's ghosts, which follow fixed rules — this page can play the game forward. Before every step it offers the model only the ways after which Pac-Man can survive the next 32 turns, with what the move eats and how far the nearest dot and the nearest ghost would be (along the maze). With one safe way Pac-Man takes it without asking.",
+    pacAsk: "Which way should Pac-Man go? Every way offered is safe. Take one that eats something, otherwise the one closest to a dot; while ghosts are frightened, catching one is worth the most.",
+    pacFields: {ghost: "ghost_distance", eats: "eats", dot: "distance_to_dot", prey: "frightened_ghost_distance",
                 moves: "moves", lives: "lives", power: "frightened_turns_left"},
     eat_dot: "a dot", eat_power: "a power pellet", eat_ghost: "a frightened ghost", eat_nothing: "nothing",
     tabMetrics: "Metrics", refresh: "Refresh", updated: "updated {time}", keyNeededShort: "API key needed",
@@ -467,27 +469,29 @@ const T = {
     play: "Start", resume: "Wznów", pause: "Pauza", gameOver: "Koniec gry", paused: "Pauza",
     pressStart: "Spacja lub strzałka, by zacząć", modelStart: "Spacja lub przycisk: gra model", letModelPlay: "Niech gra model",
     hitWall: "Wąż uderzył w ścianę.", hitSelf: "Wąż ugryzł własny ogon.", modelError: "Model nie odpowiedział — {msg}",
+    boardFull: "Wąż wypełnił całą planszę: nie ma już czego jeść.",
+    forcedMoves: "Ruchy bez wyboru, wykonane bez pytania modelu: {n}",
     lastDecision: "Ostatnia decyzja modelu", requestShown: "Zapytanie wysłane do modelu",
     snakeKeys: "Strzałki lub WASD — sterowanie, spacja — pauza. Na telefonie: przesuń palcem po planszy albo użyj przycisków.",
-    snakeModelIntro: "Steruje model. Przed każdym krokiem strona liczy dla każdego kierunku, czy ruch jest bezpieczny, jak daleko będzie jedzenie i ile wolnych pól zostanie, i zadaje modelowi jedno pytanie choice: kod liczy, model decyduje.",
-    snakeRawIntro: "Model dostaje tylko planszę jako wiersze tekstu i sam musi wymyślić ruch — dużo trudniejsze dla modelu, który odpowiada w jednym przebiegu. Porównaj z drugim trybem modelu.",
-    snakeAsk: "W którą stronę wąż ma się ruszyć? Ruch niebezpieczny kończy grę. Spośród bezpiecznych wybierz ten, który zjada jedzenie albo przybliża do niego, ale nigdy taki, po którym zostaje dużo mniej wolnych pól niż po innych.",
-    snakeAskRaw: "W którą stronę ma się ruszyć wąż (H), żeby dojść do jedzenia (F), nie uderzając w ścianę ani we własne ciało (o)?",
+    snakeModelIntro: "Steruje model. Przed każdym krokiem strona podaje mu tylko bezpieczne kierunki: takie, po których głowa nadal ma drogę do ogona, więc wąż zawsze może iść za swoim ogonem i nigdy się nie zamknie. Dla każdego liczy, czy ruch zjada jedzenie, jak daleko jest jedzenie po wolnych polach, czy wąż może je zjeść i nadal dojść do ogona oraz jak długa jest droga do ogona; model wybiera jeden kierunek jednym pytaniem choice. Gdy bezpieczny kierunek jest jeden, wąż idzie nim bez pytania: o bezpieczeństwo dba kod, o kierunek — model.",
+    snakeRawIntro: "Model dostaje tylko planszę jako wiersze tekstu i sam musi wymyślić ruch — dużo trudniejsze dla modelu, który odpowiada w jednym przebiegu. Dostaje do wyboru tylko bezpieczne kierunki, więc i tu wąż się nie rozbije. Porównaj z drugim trybem modelu.",
+    snakeAsk: "W którą stronę wąż ma się ruszyć? Każdy podany ruch jest bezpieczny. Wybierz ten, który zjada jedzenie. Jeśli takiego nie ma, wybierz ruch, po którym wąż może bezpiecznie dojść do jedzenia, i to najbliżej niego. Jeśli żaden ruch nie daje bezpiecznej drogi do jedzenia, wybierz ten z najdłuższą drogą do ogona: daje czas, aż ciało zwolni drogę.",
+    snakeAskRaw: "W którą stronę ma się ruszyć wąż (H), żeby dojść do jedzenia (F)? Każdy podany kierunek jest bezpieczny.",
     snakeLegend: "H głowa, o ciało, F jedzenie, . puste; wiersz 0 to góra, kolumna 0 to lewa krawędź",
     dir_up: "w górę", dir_down: "w dół", dir_left: "w lewo", dir_right: "w prawo",
-    snakeFields: {safe: "bezpieczny", eats: "zjada", distance: "odległość_do_jedzenia", room: "wolne_pola_po_ruchu", length: "długość",
+    snakeFields: {eats: "zjada", distance: "odległość_do_jedzenia", foodSafe: "jedzenie_bezpiecznie_osiągalne", tail: "droga_do_ogona", length: "długość",
                   moves: "ruchy", legend: "legenda", board: "plansza", direction: "kierunek"},
     tetrisFields: {piece: "klocek", heights: "wysokości_kolumn", holes: "dziury"},
     tetrisAsk: "Gdzie położyć klocek? Najlepiej: bez nowych dziur, potem więcej usuniętych linii, potem niższy i bardziej płaski stos.",
     placement: "usuwa linii: {lines}, nowe dziury: {holes}, wysokość: {height}, nierówność: {bumps}",
-    tetrisModelIntro: "Gra model. Dla każdego klocka strona liczy wszystkie ułożenia i ich skutki, podaje modelowi 5 najlepszych według klasycznej heurystyki w losowej kolejności, a model wybiera jedno. „Zgodność” mówi, jak często wybrał faworyta heurystyki.",
+    tetrisModelIntro: "Gra model. Dla każdego klocka strona liczy wszystkie ułożenia i ich skutki i ocenia je oceną El-Tetris. Podaje modelowi w losowej kolejności do 5 ułożeń ocenionych blisko najlepszego: więcej, gdy stos jest niski, tylko najlepsze, gdy jest wysoki — tak, żeby nawet najsłabszy z podanych wyborów nie przegrał (w symulacji: 0 przegranych na 400 000 klocków). Gdy zostaje jedno ułożenie, klocek trafia tam bez pytania. „Zgodność” mówi, jak często model wybrał ułożenie z najlepszą oceną.",
     tetrisKeys: "← → ruch, ↑ lub X obrót, Z obrót wstecz, ↓ szybciej, spacja — zrzut, P — pauza.",
     pacTitle: "Pac-Man", lives: "Życia", dotsLeft: "Zostało kropek", caught: "Duch złapał Pac-Mana.",
     levelUp: "Poziom {n}: labirynt znowu pełny.",
     pacKeys: "Strzałki lub WASD — sterowanie, spacja — pauza. Na telefonie: przesuń palcem po planszy albo użyj przycisków.",
-    pacModelIntro: "Steruje model. Duchy ruszają się o krok na turę, więc gra czeka na model. Przed każdym krokiem strona liczy dla każdego kierunku, jak daleko będzie najbliższy duch (po ścieżkach labiryntu), do ilu pól Pac-Man zdąży dojść przed duchami, co ruch zjada i jak daleko będzie najbliższa kropka, i zadaje modelowi jedno pytanie choice.",
-    pacAsk: "W którą stronę ma iść Pac-Man? Ruch niebezpieczny może kosztować życie; jeśli żaden nie jest bezpieczny, wybierz ten z największą liczbą wolnych pól. Spośród bezpiecznych wybierz ruch, który coś zjada, a jeśli takiego nie ma — najbliżej kropki; gdy duchy są przestraszone, złapanie ducha jest warte najwięcej.",
-    pacFields: {safe: "bezpieczny", ghost: "odległość_do_ducha", room: "wolne_pola", eats: "zjada", dot: "odległość_do_kropki", prey: "odległość_do_przestraszonego_ducha",
+    pacModelIntro: "Steruje model. Duchy ruszają się o krok na turę, więc gra czeka na model. Każdy duch losuje ruchy z własnego generatora z ziarnem, więc — jak przy duchach z oryginalnej gry, które działają według stałych reguł — strona może rozegrać grę naprzód. Przed każdym krokiem podaje modelowi tylko te kierunki, po których Pac-Man przetrwa kolejne 32 tury, razem z tym, co ruch zjada, i jak daleko będzie najbliższa kropka i najbliższy duch (po ścieżkach labiryntu). Gdy bezpieczny kierunek jest jeden, Pac-Man idzie nim bez pytania.",
+    pacAsk: "W którą stronę ma iść Pac-Man? Każdy podany kierunek jest bezpieczny. Wybierz ruch, który coś zjada, a jeśli takiego nie ma — najbliżej kropki; gdy duchy są przestraszone, złapanie ducha jest warte najwięcej.",
+    pacFields: {ghost: "odległość_do_ducha", eats: "zjada", dot: "odległość_do_kropki", prey: "odległość_do_przestraszonego_ducha",
                 moves: "ruchy", lives: "życia", power: "tury_strachu_duchów"},
     eat_dot: "kropkę", eat_power: "dużą kropkę", eat_ghost: "przestraszonego ducha", eat_nothing: "nic",
     tabMetrics: "Metryki", refresh: "Odśwież", updated: "odświeżono {time}", keyNeededShort: "wymaga klucza API",
@@ -1106,37 +1110,56 @@ const snake = (() => {
   const pace = makePacer(150, "snake.speed"), decision = makeDecisionBox();
   let mode = ["you", "model", "model_raw"].includes(store.get("snake.mode")) ? store.get("snake.mode") : "model";
 
-  function freeCell() {
-    for (;;) {
-      const p = {x: Math.floor(Math.random() * N), y: Math.floor(Math.random() * N)};
-      if (!g.body.some((b) => b.x === p.x && b.y === p.y)) return p;
-    }
+  function freeCell() {  // null when the snake fills the board
+    const free = [];
+    for (let x = 0; x < N; x++) for (let y = 0; y < N; y++) if (!g.body.some((b) => b.x === x && b.y === y)) free.push({x, y});
+    return free.length ? free[Math.floor(Math.random() * free.length)] : null;
   }
 
   function reset() {
     const mid = N / 2;
     g = {body: [{x: mid, y: mid}, {x: mid - 1, y: mid}, {x: mid - 2, y: mid}], dir: DIRS.right, queue: [],
-         score: 0, steps: 0, alive: true, running: false, grow: 0, token: -1, last: null, note: ""};
+         score: 0, steps: 0, alive: true, running: false, grow: 0, token: -1, last: null, note: "", forced: 0};
     g.food = freeCell();
   }
 
   function dirName(d) { return Object.keys(DIRS).find((k) => DIRS[k].x === d.x && DIRS[k].y === d.y); }
 
-  // Reachable empty cells from (x, y) when `blocked` cells are taken: how much room a move leaves.
-  function room(x, y, blocked) {
-    const taken = new Set(blocked.map((b) => b.x + "," + b.y));
-    const seen = new Set([x + "," + y]);
-    const todo = [[x, y]];
-    while (todo.length) {
-      const [cx, cy] = todo.pop();
+  // Shortest route (its cells) from `from` to `to` around `body`; `to` may be a body cell. null when walled off.
+  function route(from, to, body) {
+    const taken = new Set(body.map((b) => b.x + "," + b.y)), goal = to.x + "," + to.y;
+    const prev = new Map([[from.x + "," + from.y, null]]), todo = [from];
+    for (let i = 0; i < todo.length; i++) {
+      const p = todo[i];
       for (const d of Object.values(DIRS)) {
-        const nx = cx + d.x, ny = cy + d.y, key = nx + "," + ny;
-        if (nx < 0 || ny < 0 || nx >= N || ny >= N || taken.has(key) || seen.has(key)) continue;
-        seen.add(key);
-        todo.push([nx, ny]);
+        const n = {x: p.x + d.x, y: p.y + d.y}, key = n.x + "," + n.y;
+        if (n.x < 0 || n.y < 0 || n.x >= N || n.y >= N || prev.has(key) || (taken.has(key) && key !== goal)) continue;
+        prev.set(key, p);
+        if (key === goal) {
+          const out = [n];
+          for (let c = p; c.x !== from.x || c.y !== from.y; c = prev.get(c.x + "," + c.y)) out.unshift(c);
+          return out;
+        }
+        todo.push(n);
       }
     }
-    return seen.size;
+    return null;
+  }
+
+  // The safety rule: after a move the head must still reach the tail. Then the snake can always follow its tail (the
+  // cell the tail leaves is free on the next step), so it is never trapped; a move that keeps this is always there.
+  function wayToTail(body) {
+    const path = route(body[0], body[body.length - 1], body.slice(1));
+    return path ? path.length : null;
+  }
+
+  // Going the shortest way to the food and eating it, would the snake still reach its tail?
+  function foodSafe(body) {
+    const path = route(body[0], g.food, body.slice(1));
+    if (!path) return false;
+    const after = body.slice();
+    for (const c of path) { after.unshift(c); if (c.x !== g.food.x || c.y !== g.food.y) after.pop(); }
+    return wayToTail(after) !== null;
   }
 
   // What each direction would do: computed here, so the model only compares (code computes, the model decides).
@@ -1145,31 +1168,36 @@ const snake = (() => {
     const nx = head.x + d.x, ny = head.y + d.y;
     const eats = nx === g.food.x && ny === g.food.y;
     const body = eats ? g.body : g.body.slice(0, -1);  // the tail moves away unless the snake grows
-    const safe = nx >= 0 && ny >= 0 && nx < N && ny < N && !body.some((b) => b.x === nx && b.y === ny);
-    if (!safe) return {safe: false};
-    return {safe: true, eats, distance: Math.abs(g.food.x - nx) + Math.abs(g.food.y - ny),
-            room: room(nx, ny, [{x: nx, y: ny}, ...body])};
+    if (nx < 0 || ny < 0 || nx >= N || ny >= N || body.some((b) => b.x === nx && b.y === ny)) return {safe: false};
+    const after = [{x: nx, y: ny}, ...body], tail = wayToTail(after);
+    if (tail === null) return {safe: false};
+    const toFood = eats ? [] : route(after[0], g.food, after.slice(1));
+    return {safe: true, eats, foodSafe: eats || foodSafe(after), distance: toFood ? toFood.length : null, tail};
   }
+
+  function safeMoves() { return legal().filter((k) => analyse(k).safe); }
 
   function legal() {  // turning back into the neck is not a move
     return Object.keys(DIRS).filter((k) => !(DIRS[k].x === -g.dir.x && DIRS[k].y === -g.dir.y));
   }
 
-  function moveCriteria() {
-    return Object.fromEntries(legal().map((k) => [k, t("dir_" + k)]));
+  function moveCriteria(safe) {  // only the safe directions are options
+    return Object.fromEntries(safe.map((k) => [k, t("dir_" + k)]));
   }
 
-  function featureRequest() {
+  function featureRequest(safe) {
     const f = T[S.lang].snakeFields;
-    const moves = Object.fromEntries(legal().map((k) => {
-      const a = analyse(k);
-      return [k, a.safe ? {[f.safe]: true, [f.eats]: a.eats, [f.distance]: a.distance, [f.room]: a.room} : {[f.safe]: false}];
+    const moves = Object.fromEntries(safe.map((k) => {
+      const a = analyse(k), move = {[f.eats]: a.eats, [f.foodSafe]: a.foodSafe};
+      if (a.distance !== null) move[f.distance] = a.distance;
+      move[f.tail] = a.tail;
+      return [k, move];
     }));
     return {state: {[f.length]: g.body.length, [f.moves]: moves},
-            questions: {move: {type: "choice", instructions: t("snakeAsk"), criteria: moveCriteria()}}};
+            questions: {move: {type: "choice", instructions: t("snakeAsk"), criteria: moveCriteria(safe)}}};
   }
 
-  function boardRequest() {
+  function boardRequest(safe) {
     const rows = [];
     for (let y = 0; y < N; y++) {
       let row = "";
@@ -1181,7 +1209,7 @@ const snake = (() => {
     }
     const f = T[S.lang].snakeFields;
     return {state: {[f.legend]: t("snakeLegend"), [f.board]: rows, [f.direction]: t("dir_" + dirName(g.dir))},
-            questions: {move: {type: "choice", instructions: t("snakeAskRaw"), criteria: moveCriteria()}}};
+            questions: {move: {type: "choice", instructions: t("snakeAskRaw"), criteria: moveCriteria(safe)}}};
   }
 
   function over(reason) {
@@ -1205,6 +1233,7 @@ const snake = (() => {
       g.food = freeCell();
     }
     if (g.grow > 0) g.grow -= 1; else g.body.pop();
+    if (!g.food) over(t("boardFull"));
   }
 
   function tick() {  // the player's game
@@ -1218,8 +1247,17 @@ const snake = (() => {
 
   async function modelPlays(token) {
     while (g.running && g.token === token) {
-      const request = mode === "model" ? featureRequest() : boardRequest();
-      const started = performance.now();
+      const safe = safeMoves(), started = performance.now();
+      if (safe.length === 1) {  // no choice: the only safe way, without asking the model
+        g.forced += 1;
+        g.dir = DIRS[safe[0]];
+        step();
+        draw();
+        side();
+        await sleep(pace.period());
+        continue;
+      }
+      const request = mode === "model" ? featureRequest(safe) : boardRequest(safe);
       const r = await call("v1/systemone", JSON.stringify(request));
       if (!g.running || g.token !== token) return;  // paused or restarted meanwhile
       const answer = r.status === 200 && r.body.answers ? r.body.answers.move : null;
@@ -1265,10 +1303,12 @@ const snake = (() => {
     ctx.fillRect(0, 0, size, size);
     ctx.fillStyle = cssVar("--line");
     for (let x = 0; x < N; x++) for (let y = x % 2; y < N; y += 2) ctx.fillRect(x * cell + cell / 2 - 1, y * cell + cell / 2 - 1, 2, 2);
-    ctx.fillStyle = cssVar("--bad");
-    ctx.beginPath();
-    ctx.arc(g.food.x * cell + cell / 2, g.food.y * cell + cell / 2, cell * 0.38, 0, 2 * Math.PI);
-    ctx.fill();
+    if (g.food) {
+      ctx.fillStyle = cssVar("--bad");
+      ctx.beginPath();
+      ctx.arc(g.food.x * cell + cell / 2, g.food.y * cell + cell / 2, cell * 0.38, 0, 2 * Math.PI);
+      ctx.fill();
+    }
     g.body.forEach((b, i) => block(ctx, b.x * cell + 1, b.y * cell + 1, cell - 2, i === 0 ? cssVar("--ink") : cssVar("--accent"), 4));
     if (!g.alive) banner(ctx, size, size, `${t("gameOver")} · ${g.score}`);
     else if (!g.running) banner(ctx, size, size, g.steps ? t("paused") : mode === "you" ? t("pressStart") : t("modelStart"));
@@ -1289,6 +1329,7 @@ const snake = (() => {
       el("div", {class: "stats"}, stat(t("points"), g.score), stat(t("length"), g.body.length),
         mode === "you" ? stat(t("best"), bestScore("snake-" + mode)) : stat(t("moves"), g.steps)),
       el("p", {class: "small muted"}, t(mode === "you" ? "snakeKeys" : mode === "model" ? "snakeModelIntro" : "snakeRawIntro"))];
+    if (mode !== "you" && g.forced) parts.push(el("div", {class: "small muted"}, fmt(t("forcedMoves"), {n: g.forced})));
     if (mode !== "you" && pace.view()) parts.push(pace.view());
     const below = [];
     if (g.note) below.push(el("div", {class: "note ko"}, g.note));
@@ -1348,9 +1389,11 @@ const tetris = (() => {
   };
   const COLORS = {I: "#35b5d8", O: "#e2b33c", T: "#9a68d6", S: "#45b06a", Z: "#d9534f", J: "#3f6fd8", L: "#e0873a"};
   const LINE_POINTS = [0, 100, 300, 500, 800];
-  // Placements offered to the model per piece. Measured on 2 x 60 pieces: with the 5 best the model clears as many
-  // lines as the heuristic (22 and 21 vs 21 and 22); with 8 the weaker extras cost it 4-5 lines and leave holes.
-  const SHOWN = 5;
+  // Placements offered to the model per piece: at most the 5 best (with 8 the weaker extras cost the model lines and
+  // left holes), and only those rated close to the best — how close depends on the stack: [highest column, margin].
+  // Low stacks leave room to recover, high ones get only the best. Simulated with the WEAKEST offered placement always
+  // taken: 0 game overs in 40 games of 10,000 pieces (the stack at most 16 of 20 rows), as many lines as the best.
+  const SHOWN = 5, MARGINS = [[6, 15], [10, 5], [ROWS, 0]];
   let g = null, cell = 24, ctx = null, nextCtx = null, raf = null, last = 0, epoch = 0, topBox = null, bottomBox = null;
   const pace = makePacer(400, "tetris.speed"), decision = makeDecisionBox();
   let mode = store.get("tetris.mode") === "you" ? "you" : "model";
@@ -1383,7 +1426,7 @@ const tetris = (() => {
 
   function reset() {
     g = {board: Array.from({length: ROWS}, () => Array(COLS).fill(null)), queue: [], score: 0, lines: 0, level: 1,
-         alive: true, running: false, acc: 0, token: -1, pieces: 0, agree: 0, last: null, target: null, note: ""};
+         alive: true, running: false, acc: 0, token: -1, pieces: 0, agree: 0, asked: 0, forced: 0, last: null, target: null, note: ""};
     g.piece = take();
   }
 
@@ -1460,6 +1503,31 @@ const tetris = (() => {
     return n;
   }
 
+  // The El-Tetris evaluation (P. Dellacherie's features, weights tuned by Y. Bouzid): it rates a placement by where
+  // the piece lands, the lines it clears and the board it leaves — holes, wells, and how often rows and columns
+  // switch between filled and empty. Played alone it does not lose in thousands of pieces.
+  function rating(board, y, size, lines) {
+    let rowSwitch = 0, colSwitch = 0, wells = 0;
+    for (let r = 0; r < ROWS; r++) {
+      let prev = 1;
+      for (let c = 0; c < COLS; c++) { const v = board[r][c] ? 1 : 0; if (v !== prev) rowSwitch += 1; prev = v; }
+      if (!prev) rowSwitch += 1;
+    }
+    for (let c = 0; c < COLS; c++) {
+      let prev = 0, depth = 0;
+      for (let r = 0; r < ROWS; r++) {
+        const v = board[r][c] ? 1 : 0;
+        if (v !== prev) colSwitch += 1;
+        prev = v;
+        if (!v && (c === 0 || board[r][c - 1]) && (c === COLS - 1 || board[r][c + 1])) { depth += 1; wells += depth; } else depth = 0;
+      }
+      if (!prev) colSwitch += 1;
+    }
+    const landing = ROWS - y - size / 2;
+    return -4.500158825082766 * landing + 3.4181268101392694 * lines - 3.2178882868487753 * rowSwitch
+           - 9.348695305445199 * colSwitch - 7.899265427351652 * holes(board) - 3.3855972247263626 * wells;
+  }
+
   function placements() {
     const before = holes(g.board);
     const out = [], seen = new Set();
@@ -1483,8 +1551,7 @@ const tetris = (() => {
         const newHoles = Math.max(0, holes(kept) - before);
         const bumpiness = h.slice(1).reduce((s, v, i) => s + Math.abs(v - h[i]), 0);
         const height = Math.max(...h);
-        // the classic hand-tuned evaluation, only to choose which placements the model sees
-        const value = -0.51 * h.reduce((s, v) => s + v, 0) + 0.76 * lines - 0.36 * holes(kept) - 0.18 * bumpiness;
+        const value = rating(kept, y, m.length, lines);  // only to choose which placements the model sees
         out.push({m, x, y, lines, newHoles, height, bumpiness, value});
       }
       m = turned(m, 1);
@@ -1520,17 +1587,22 @@ const tetris = (() => {
       const all = placements();
       if (!all.length) { gameOver(); break; }
       const best = all.slice().sort((a, b) => b.value - a.value);
-      const shown = shuffle(best.slice(0, SHOWN));
-      const request = modelRequest(shown);
+      const margin = MARGINS.find(([top]) => Math.max(...heights(g.board)) <= top)[1];
+      const shown = shuffle(best.slice(0, SHOWN).filter((p) => p.value >= best[0].value - margin));
       const started = performance.now();
-      const r = await call("v1/systemone", JSON.stringify(request));
-      if (!g.running || g.token !== token) return;
-      const answer = r.status === 200 && r.body.answers ? r.body.answers.place : null;
-      const pick = answer ? shown[answer.choice.charCodeAt(0) - 97] : null;
-      if (!pick) { g.running = false; g.note = callError(r); break; }
-      g.last = {request, answer, ms: performance.now() - started};
-      pace.add(g.last.ms);
-      if (pick === best[0]) g.agree += 1;
+      let pick = shown[0];
+      if (shown.length > 1) {
+        const request = modelRequest(shown);
+        const r = await call("v1/systemone", JSON.stringify(request));
+        if (!g.running || g.token !== token) return;
+        const answer = r.status === 200 && r.body.answers ? r.body.answers.place : null;
+        pick = answer ? shown[answer.choice.charCodeAt(0) - 97] : null;
+        if (!pick) { g.running = false; g.note = callError(r); break; }
+        g.last = {request, answer, ms: performance.now() - started};
+        pace.add(g.last.ms);
+        g.asked += 1;
+        if (pick === best[0]) g.agree += 1;
+      } else g.forced += 1;  // one placement close to the best: no choice to ask about
       g.piece.m = pick.m;
       g.piece.x = pick.x;
       g.target = pick;
@@ -1622,9 +1694,10 @@ const tetris = (() => {
       el("div", {class: "stats"}, stat(t("points"), g.score, "tetris-score"), stat(t("lines"), g.lines, "tetris-lines"),
         stat(t("level"), g.level, "tetris-level")),
       el("div", {class: "small muted"}, mode === "you" ? `${t("best")}: ${bestScore("tetris-you")}`
-        : `${t("pieces")}: ${g.pieces} · ${t("agree")}: ${g.pieces ? Math.round(100 * g.agree / g.pieces) + "%" : "–"}`),
+        : `${t("pieces")}: ${g.pieces} · ${t("agree")}: ${g.asked ? Math.round(100 * g.agree / g.asked) + "%" : "–"}`),
       el("div", {class: "small muted"}, t("nextPiece")), nextCanvas,
       el("p", {class: "small muted"}, t(mode === "you" ? "tetrisKeys" : "tetrisModelIntro"))];
+    if (mode !== "you" && g.forced) parts.push(el("div", {class: "small muted"}, fmt(t("forcedMoves"), {n: g.forced})));
     if (mode !== "you" && pace.view()) parts.push(pace.view());
     const below = [];
     if (g.note) below.push(el("div", {class: "note ko"}, g.note));
@@ -1697,10 +1770,12 @@ const pacman = (() => {
   const DIRS = {up: {x: 0, y: -1}, down: {x: 0, y: 1}, left: {x: -1, y: 0}, right: {x: 1, y: 0}};
   const GHOSTS = [{color: "#ff4d4d", chase: 0.8}, {color: "#ff9de0", chase: 0.6}, {color: "#4de1ff", chase: 0.4}];
   const POWER_TURNS = 30;
-  // A move is safe when the nearest ghost is at least 3 steps away and Pac-Man would still reach at least 10 cells
-  // before any ghost (a corridor closed by ghosts at both ends has few). Measured with a simple rule over 20 games of
-  // 300 turns: 0.40 lives lost per game instead of 1.45 with the ghost distance alone, as many dots eaten.
-  const SAFE_GHOST = 3, SAFE_CELLS = 10;
+  // Each ghost draws its random moves from its own seeded generator, so the page can play the game forward, as the
+  // original's ghosts follow fixed rules. A way is offered to the model when Pac-Man can then survive LOOKAHEAD more
+  // turns (the search stops at the first way that lasts and looks at most at BUDGET states per way). Simulated with
+  // the weakest offered way always taken, and with the way closest to a dot: 0 lives lost in 30 + 30 games of 3,000
+  // turns; with 16 turns ahead an occasional life was still lost.
+  const LOOKAHEAD = 32, BUDGET = 100000;
   let g = null, timer = null, cell = 22, ctx = null, touch = null, epoch = 0, topBox = null, bottomBox = null;
   const pace = makePacer(150, "pacman.speed"), decision = makeDecisionBox();
   let mode = store.get("pacman.mode") === "you" ? "you" : "model";
@@ -1713,8 +1788,12 @@ const pacman = (() => {
   function exits(p) { return Object.keys(DIRS).filter((k) => !wall(p.x + DIRS[k].x, p.y + DIRS[k].y)); }
 
   // Path lengths through the maze from one cell to every other (breadth-first): "how far" for Pac-Man and ghosts.
+  // The maze does not change, so each cell's map is kept; callers only read it.
+  const known = new Map();
   function distances(from) {
+    if (known.has(at(from))) return known.get(at(from));
     const dist = new Map([[at(from), 0]]), todo = [from];
+    known.set(at(from), dist);
     for (let i = 0; i < todo.length; i++) {
       const p = todo[i];
       for (const d of Object.values(DIRS)) {
@@ -1738,35 +1817,52 @@ const pacman = (() => {
     g.dir = DIRS.left;
     g.want = null;
     g.power = 0;
-    g.ghosts = PEN.map((p, i) => ({x: p.x, y: p.y, start: {...p}, prev: null, dir: DIRS.up, scared: false, ...GHOSTS[i % GHOSTS.length]}));
+    g.ghosts = PEN.map((p, i) => ({x: p.x, y: p.y, start: {...p}, prev: null, dir: DIRS.up, scared: false,
+                                    seed: Math.floor(Math.random() * 2 ** 32), ...GHOSTS[i % GHOSTS.length]}));
   }
 
   function reset() {
-    g = {score: 0, lives: 3, level: 1, turn: 0, alive: true, running: false, token: -1, last: null, note: "", noteOk: false, mouth: 0};
+    g = {score: 0, lives: 3, level: 1, turn: 0, alive: true, running: false, token: -1, last: null, note: "", noteOk: false, mouth: 0,
+         forced: 0};
     fill();
     place();
   }
 
   function setNote(text, ok) { g.note = text; g.noteOk = ok; }
 
-  function eat() {
-    const what = g.dots.get(at(g.pac));
+  // The game state `s` is `g`, or a copy of it while the page looks ahead. A copy shares the dots (read only) and
+  // keeps the ones it has eaten in `gone`.
+  function copy(s) {
+    return {...s, pac: {...s.pac}, pacPrev: {...s.pacPrev}, ghosts: s.ghosts.map((gh) => ({...gh})), gone: new Set(s.gone || [])};
+  }
+
+  function dotAt(s, key) { return s.gone && s.gone.has(key) ? undefined : s.dots.get(key); }
+
+  function rand(gh) {  // mulberry32: the ghost's next random number from its own state
+    let x = (gh.seed = (gh.seed + 0x6D2B79F5) | 0);
+    x = Math.imul(x ^ (x >>> 15), x | 1);
+    x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  }
+
+  function eat(s) {
+    const key = at(s.pac), what = dotAt(s, key);
     if (!what) return;
-    g.dots.delete(at(g.pac));
-    if (what === "dot") { g.score += 10; return; }
-    g.score += 50;
-    g.power = POWER_TURNS;
-    for (const gh of g.ghosts) { gh.scared = true; gh.dir = {x: -gh.dir.x, y: -gh.dir.y}; }
+    if (s.gone) s.gone.add(key); else s.dots.delete(key);
+    if (what === "dot") { s.score += 10; return; }
+    s.score += 50;
+    s.power = POWER_TURNS;
+    for (const gh of s.ghosts) { gh.scared = true; gh.dir = {x: -gh.dir.x, y: -gh.dir.y}; }
   }
 
   // Same cell, or Pac-Man and a ghost swapped cells this turn. A frightened ghost is eaten and goes home.
-  function hit() {
-    for (const gh of g.ghosts) {
-      const same = gh.x === g.pac.x && gh.y === g.pac.y;
-      const swapped = gh.prev && gh.prev.x === g.pac.x && gh.prev.y === g.pac.y && gh.x === g.pacPrev.x && gh.y === g.pacPrev.y;
+  function hit(s) {
+    for (const gh of s.ghosts) {
+      const same = gh.x === s.pac.x && gh.y === s.pac.y;
+      const swapped = gh.prev && gh.prev.x === s.pac.x && gh.prev.y === s.pac.y && gh.x === s.pacPrev.x && gh.y === s.pacPrev.y;
       if (!same && !swapped) continue;
       if (gh.scared) {
-        g.score += 200;
+        s.score += 200;
         Object.assign(gh, {x: gh.start.x, y: gh.start.y, prev: null, scared: false, dir: DIRS.up});
         continue;
       }
@@ -1775,18 +1871,18 @@ const pacman = (() => {
     return false;
   }
 
-  function moveGhosts() {
-    const toPac = distances(g.pac);
-    const rest = g.turn % Math.max(4, 2 + 2 * g.level) === 0;  // a little slower than Pac-Man, less so each level
-    for (const gh of g.ghosts) {
+  function moveGhosts(s) {
+    const toPac = distances(s.pac);
+    const rest = s.turn % Math.max(4, 2 + 2 * s.level) === 0;  // a little slower than Pac-Man, less so each level
+    for (const gh of s.ghosts) {
       gh.prev = {x: gh.x, y: gh.y};
-      if (rest || (gh.scared && g.turn % 2)) continue;  // frightened ghosts move every other turn
+      if (rest || (gh.scared && s.turn % 2)) continue;  // frightened ghosts move every other turn
       let options = exits(gh).filter((k) => !(DIRS[k].x === -gh.dir.x && DIRS[k].y === -gh.dir.y));
       if (!options.length) options = exits(gh);
       const far = (k) => toPac.get((gh.x + DIRS[k].x) + "," + (gh.y + DIRS[k].y)) ?? 999;
-      const pick = !gh.scared && Math.random() < gh.chase
+      const pick = !gh.scared && rand(gh) < gh.chase
         ? options.reduce((a, b) => (far(a) <= far(b) ? a : b))
-        : options[Math.floor(Math.random() * options.length)];
+        : options[Math.floor(rand(gh) * options.length)];
       gh.dir = DIRS[pick];
       gh.x += gh.dir.x;
       gh.y += gh.dir.y;
@@ -1802,17 +1898,23 @@ const pacman = (() => {
     bestScore("pacman-" + mode, g.score);
   }
 
+  // One turn of state `s`; true when a ghost catches Pac-Man.
+  function advance(s) {
+    s.turn += 1;
+    for (const gh of s.ghosts) gh.prev = null;
+    if (s.want && !wall(s.pac.x + s.want.x, s.pac.y + s.want.y)) s.dir = s.want;
+    s.pacPrev = {...s.pac};
+    if (!wall(s.pac.x + s.dir.x, s.pac.y + s.dir.y)) { s.pac.x += s.dir.x; s.pac.y += s.dir.y; s.mouth ^= 1; }
+    eat(s);
+    if (hit(s)) return true;
+    moveGhosts(s);
+    if (hit(s)) return true;
+    if (s.power > 0 && --s.power === 0) for (const gh of s.ghosts) gh.scared = false;
+    return false;
+  }
+
   function step() {
-    g.turn += 1;
-    for (const gh of g.ghosts) gh.prev = null;
-    if (g.want && !wall(g.pac.x + g.want.x, g.pac.y + g.want.y)) g.dir = g.want;
-    g.pacPrev = {...g.pac};
-    if (!wall(g.pac.x + g.dir.x, g.pac.y + g.dir.y)) { g.pac.x += g.dir.x; g.pac.y += g.dir.y; g.mouth ^= 1; }
-    eat();
-    if (hit()) return lose();
-    moveGhosts();
-    if (hit()) return lose();
-    if (g.power > 0 && --g.power === 0) for (const gh of g.ghosts) gh.scared = false;
+    if (advance(g)) return lose();
     if (!g.dots.size) {
       g.level += 1;
       setNote(fmt(t("levelUp"), {n: g.level}), true);
@@ -1821,28 +1923,48 @@ const pacman = (() => {
     }
   }
 
+  // How many turns (up to `depth`) Pac-Man survives from state `s`, choosing his way each turn.
+  function survival(s, depth, budget) {
+    if (depth === 0) return 0;
+    let best = 0;
+    for (const k of exits(s.pac)) {
+      if (budget.left-- <= 0) return best;
+      const next = copy(s);
+      next.want = DIRS[k];
+      if (advance(next)) continue;
+      best = Math.max(best, 1 + survival(next, depth - 1, budget));
+      if (best === depth) return best;
+    }
+    return best;
+  }
+
+  // The ways after which Pac-Man survives the longest (LOOKAHEAD turns, unless no way does).
+  function safeWays() {
+    const ways = exits(g.pac);
+    const lasts = ways.map((k) => {
+      const s = copy(g);
+      s.want = DIRS[k];
+      return advance(s) ? -1 : 1 + survival(s, LOOKAHEAD - 1, {left: BUDGET});
+    });
+    const top = Math.max(...lasts);
+    return ways.filter((k, i) => lasts[i] === top);
+  }
+
   // What each way would do, worked out here; the model only compares (code computes, the model decides).
-  function modelRequest() {
+  function modelRequest(ways) {
     const f = T[S.lang].pacFields;
     const hunters = g.ghosts.filter((gh) => !gh.scared).map((gh) => distances(gh));
     const prey = g.ghosts.filter((gh) => gh.scared).map((gh) => distances(gh));
     const moves = {};
-    for (const k of exits(g.pac)) {
+    for (const k of ways) {
       const n = {x: g.pac.x + DIRS[k].x, y: g.pac.y + DIRS[k].y}, here = at(n);
       const ghost = hunters.length ? Math.min(...hunters.map((m) => m.get(here) ?? 99)) : null;
       const eats = g.dots.get(here) || (g.ghosts.some((gh) => gh.scared && gh.x === n.x && gh.y === n.y) ? "ghost" : "nothing");
       const fromN = distances(n);
       const dot = g.dots.has(here) || !g.dots.size ? 0 : Math.min(...[...g.dots.keys()].map((d) => fromN.get(d) ?? 99));
-      let room = null;  // cells Pac-Man reaches before any ghost could
-      if (hunters.length) {
-        room = 0;
-        for (const [c, d] of fromN) if (d < Math.min(...hunters.map((m) => m.get(c) ?? 99)) - 1) room += 1;
-      }
-      const move = {[f.safe]: ghost === null || (ghost >= SAFE_GHOST && room >= SAFE_CELLS)};
-      if (ghost !== null) move[f.ghost] = ghost;
-      if (room !== null) move[f.room] = room;
-      move[f.eats] = t("eat_" + eats);
+      const move = {[f.eats]: t("eat_" + eats)};
       move[f.dot] = dot;
+      if (ghost !== null) move[f.ghost] = ghost;
       if (prey.length) move[f.prey] = Math.min(...prey.map((m) => m.get(here) ?? 99));
       moves[k] = move;
     }
@@ -1863,8 +1985,17 @@ const pacman = (() => {
 
   async function modelPlays(token) {
     while (g.running && g.token === token) {
-      const request = modelRequest();
-      const started = performance.now();
+      const ways = safeWays(), started = performance.now();
+      if (ways.length === 1) {  // no choice: the only safe way, without asking the model
+        g.forced += 1;
+        g.want = DIRS[ways[0]];
+        step();
+        draw();
+        side();
+        await sleep(pace.period());
+        continue;
+      }
+      const request = modelRequest(ways);
       const r = await call("v1/systemone", JSON.stringify(request));
       if (!g.running || g.token !== token) return;
       const answer = r.status === 200 && r.body.answers ? r.body.answers.move : null;
@@ -1972,6 +2103,7 @@ const pacman = (() => {
       el("div", {class: "small muted"}, `${t("level")}: ${g.level}` + (mode === "you" ? ` · ${t("best")}: ${bestScore("pacman-you")}`
         : ` · ${t("best")}: ${bestScore("pacman-model")}`)),
       el("p", {class: "small muted"}, t(mode === "you" ? "pacKeys" : "pacModelIntro"))];
+    if (mode !== "you" && g.forced) parts.push(el("div", {class: "small muted"}, fmt(t("forcedMoves"), {n: g.forced})));
     if (mode !== "you" && pace.view()) parts.push(pace.view());
     const below = [];
     if (g.note) below.push(el("div", {class: "note " + (g.noteOk ? "ok" : "ko")}, g.note));

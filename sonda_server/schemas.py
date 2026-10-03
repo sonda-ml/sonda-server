@@ -19,6 +19,11 @@ the client's own JSON (not a re-serialised copy), so key order and values reach 
 With input validation switched off (`--no-input-validation`) only what the prompt needs is checked: state and
 questions present, a known type, instructions present, at least two options.
 
+TypeSafe compatibility (`--typesafe-compat`) keeps every check but takes what TypeSafe's API takes and the default
+refuses: an empty `state` (the whole case is then in the instructions, as in MMLU or HellaSwag rows), any question
+id of 1-128 characters without control characters (e.g. "BATTERY#GENERAL__sentiment_negative") and at least 64
+questions per request.
+
 Answer filter
 ----------------------------
 
@@ -40,6 +45,7 @@ from .config import Settings
 from .options import QUESTION_TYPES, option_pairs
 
 QUESTION_ID = re.compile(r"[A-Za-z0-9_.-]{1,64}")
+TYPESAFE_QUESTION_ID = re.compile(r"[^\x00-\x1f\x7f]{1,128}")  # --typesafe-compat
 # Answer fields the API may return; `temperature` only with --expose-temperature.
 ANSWER_FIELDS = ("type", "noul", "choice", "score", "probabilities", "confidence", "input_tokens")
 SUM_TOLERANCE = 1e-3
@@ -107,17 +113,19 @@ def validate_request(data, settings: Settings) -> list[dict]:
         return [{"loc": _loc(e["loc"]), "msg": e["msg"]} for e in error.errors(include_url=False)]
     errors = []
     state = data["state"]
-    if _empty(state):
+    if _empty(state) and not settings.typesafe_compat:
         errors.append({"loc": "state", "msg": "the evidence must not be empty"})
     elif len(json.dumps(state, ensure_ascii=False)) > settings.max_state_chars:
         errors.append({"loc": "state", "msg": f"the evidence is longer than {settings.max_state_chars} characters"})
     questions = data["questions"]
-    if not 1 <= len(questions) <= settings.max_questions:
-        errors.append({"loc": "questions", "msg": f"give 1 to {settings.max_questions} questions"})
+    if not 1 <= len(questions) <= settings.question_limit:
+        errors.append({"loc": "questions", "msg": f"give 1 to {settings.question_limit} questions"})
+    id_rule, id_text = ((TYPESAFE_QUESTION_ID, "1-128 characters without control characters") if settings.typesafe_compat
+                        else (QUESTION_ID, "1-64 characters of letters, digits, _ . -"))
     for qid, question in questions.items():
         where = f"questions.{qid}"
-        if not QUESTION_ID.fullmatch(qid):
-            errors.append({"loc": where, "msg": "a question id is 1-64 characters of letters, digits, _ . -"})
+        if not id_rule.fullmatch(qid):
+            errors.append({"loc": where, "msg": f"a question id is {id_text}"})
         if _empty(question["instructions"]):
             errors.append({"loc": f"{where}.instructions", "msg": "the instructions must not be empty"})
         criteria = question.get("criteria")

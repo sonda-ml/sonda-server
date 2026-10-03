@@ -70,7 +70,8 @@ class Engine:
         limit = self.settings.max_input_tokens
         longest = max(len(self.encode(state, question["instructions"], p)) for p in passes)
         if longest > limit:
-            return [f"the prompt is {longest} tokens, longer than the limit of {limit}"]
+            return [f"the prompt is {longest} tokens, longer than the limit of {limit} (the maximum context length, "
+                    "--max-input-tokens)"]
         return []
 
     def decide(self, state, question: dict) -> dict:
@@ -84,7 +85,8 @@ class Engine:
             nonlocal tokens
             ids = self.encode(state, question["instructions"], texts)
             if len(ids) > self.settings.max_input_tokens:
-                raise InputTooLong(f"a pass is {len(ids)} tokens, longer than {self.settings.max_input_tokens}")
+                raise InputTooLong(f"a pass is {len(ids)} tokens, longer than the limit of {self.settings.max_input_tokens} "
+                                   "(the maximum context length, --max-input-tokens)")
             tokens += len(ids)
             return [float(p) for p in softmax(self.read_logits(ids, len(texts)), temperature)]
 

@@ -94,7 +94,8 @@ def create_app(settings: Settings, engine, metrics: Metrics | None = None) -> Fa
     app.state.settings, app.state.engine, app.state.metrics = settings, engine, metrics
 
     def validation_state() -> dict:
-        return {"input": settings.input_validation, "output": settings.output_filter}
+        return {"input": settings.input_validation, "output": settings.output_filter,
+                "typesafe_compat": settings.typesafe_compat}
 
     def key_from_env(name: str) -> str:
         return os.environ.get(name, "") if name else ""
