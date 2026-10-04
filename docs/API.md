@@ -36,7 +36,7 @@ The TypeSafe-style decision call: one piece of evidence, one or more typed quest
 | anything else | rejected (unknown field) |
 
 Each question is read as one prompt (up to 16 options) or several (more options); a prompt longer than
-`max_input_tokens` (8192) rejects the request (422) before anything is computed.
+`max_input_tokens` (32768) rejects the request (422) before anything is computed.
 
 ### Response 200
 

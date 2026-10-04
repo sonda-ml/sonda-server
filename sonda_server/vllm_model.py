@@ -29,7 +29,7 @@ def letter_rows(outputs, slots: list[int]) -> np.ndarray:
 
 
 class VllmLetterModel:
-    def __init__(self, source: str, max_model_len: int = 8192, gpu_memory_utilization: float = 0.25,
+    def __init__(self, source: str, max_model_len: int = 32768, gpu_memory_utilization: float = 0.25,
                  extra: dict | None = None):
         import transformers  # noqa: PLC0415
         from vllm import LLM, SamplingParams  # noqa: PLC0415 - only when this engine is chosen

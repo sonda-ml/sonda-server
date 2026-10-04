@@ -87,7 +87,7 @@ class Settings:
     max_options: int = 256
     max_levels: int = 16
     max_key_chars: int = 64
-    max_input_tokens: int = 8192         # one pass, after the chat template
+    max_input_tokens: int = 32768        # one pass, after the chat template
 
     # batching
     batch_window_ms: float = 3.0         # how long the GPU worker waits to fill a batch after the first pass

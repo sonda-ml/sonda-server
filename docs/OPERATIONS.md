@@ -49,7 +49,7 @@ wins.
 | `--max-options` | 256 | options of a choice question |
 | `--max-levels` | 16 | levels of a score question |
 | `--max-key-chars` | 64 | length of an option key |
-| `--max-input-tokens` | 8192 | longest prompt of one pass |
+| `--max-input-tokens` | 32768 | longest prompt of one pass |
 | `--batch-window-ms` | 3 | how long the GPU worker waits to fill a batch after the first prompt |
 | `--max-batch` | 32 | prompts per forward |
 | `--token-budget` | 32768 | rows × padded length per forward |
