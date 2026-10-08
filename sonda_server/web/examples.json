@@ -216,6 +216,53 @@
       }
     },
     {
+      "id": "finance-bank-category",
+      "domain": "finance",
+      "data": "text",
+      "title": {"en": "Bank transaction: a listed category", "pl": "Transakcja z wyciągu: kategoria z listy"},
+      "expected": {"category": "utilities"},
+      "request": {
+        "en": {
+          "state": "Bank statement line. Description: transfer to City Gas Ltd, title: invoice FV/10/2026 for gas, customer no. 44718. Amount: -43.60 EUR.",
+          "questions": {
+            "category": {"type": "choice", "instructions": "Which household budget category does this transaction belong to? If none of the listed categories fits, choose “None of the listed categories”.",
+                         "criteria": {"groceries": "Groceries", "fuel": "Fuel", "eating_out": "Restaurants and takeaway", "transport": "Public transport and taxis", "health": "Health and pharmacy", "utilities": "Utilities (electricity, gas, water)", "phone_internet": "Phone and internet", "clothing": "Clothing and shoes", "entertainment": "Culture and entertainment", "none": "None of the listed categories"}}
+          }
+        },
+        "pl": {
+          "state": "Wiersz wyciągu bankowego. Opis: przelew do Gazownia Miejska sp. z o.o., tytuł: faktura FV/10/2026 za gaz, nr klienta 44718. Kwota: -186,40 zł.",
+          "questions": {
+            "category": {"type": "choice", "instructions": "Do której kategorii budżetu domowego należy ta transakcja? Jeśli żadna z wymienionych kategorii nie pasuje, wybierz „Żadna z wymienionych kategorii”.",
+                         "criteria": {"groceries": "Zakupy spożywcze", "fuel": "Paliwo", "eating_out": "Restauracje i jedzenie na wynos", "transport": "Komunikacja i taksówki", "health": "Zdrowie i apteka", "utilities": "Media (prąd, gaz, woda)", "phone_internet": "Telefon i internet", "clothing": "Odzież i obuwie", "entertainment": "Kultura i rozrywka", "none": "Żadna z wymienionych kategorii"}}
+          }
+        }
+      }
+    },
+    {
+      "id": "finance-bank-category-none",
+      "note": {"en": "The payer is a pharmacy, but this is incoming pay, not spending on health; no category on the list fits, so the answer is the \"none\" option.", "pl": "Płatnikiem jest apteka, ale to wpływ wynagrodzenia, a nie wydatek na zdrowie; żadna kategoria z listy nie pasuje, więc odpowiedzią jest opcja „żadna”."},
+      "domain": "finance",
+      "data": "text",
+      "title": {"en": "Bank transaction: none of the listed", "pl": "Transakcja z wyciągu: żadna z wymienionych"},
+      "expected": {"category": "none"},
+      "request": {
+        "en": {
+          "state": "Bank statement line. Description: incoming transfer from Linden Pharmacy Ltd, title: salary for September 2026. Amount: +1,480.00 EUR.",
+          "questions": {
+            "category": {"type": "choice", "instructions": "Which household budget category does this transaction belong to? If none of the listed categories fits, choose “None of the listed categories”.",
+                         "criteria": {"groceries": "Groceries", "fuel": "Fuel", "eating_out": "Restaurants and takeaway", "transport": "Public transport and taxis", "health": "Health and pharmacy", "utilities": "Utilities (electricity, gas, water)", "phone_internet": "Phone and internet", "clothing": "Clothing and shoes", "entertainment": "Culture and entertainment", "none": "None of the listed categories"}}
+          }
+        },
+        "pl": {
+          "state": "Wiersz wyciągu bankowego. Opis: przelew przychodzący od Apteka Pod Lipami sp. z o.o., tytuł: wynagrodzenie za wrzesień 2026. Kwota: +6 240,00 zł.",
+          "questions": {
+            "category": {"type": "choice", "instructions": "Do której kategorii budżetu domowego należy ta transakcja? Jeśli żadna z wymienionych kategorii nie pasuje, wybierz „Żadna z wymienionych kategorii”.",
+                         "criteria": {"groceries": "Zakupy spożywcze", "fuel": "Paliwo", "eating_out": "Restauracje i jedzenie na wynos", "transport": "Komunikacja i taksówki", "health": "Zdrowie i apteka", "utilities": "Media (prąd, gaz, woda)", "phone_internet": "Telefon i internet", "clothing": "Odzież i obuwie", "entertainment": "Kultura i rozrywka", "none": "Żadna z wymienionych kategorii"}}
+          }
+        }
+      }
+    },
+    {
       "id": "law-notice-period",
       "note": {"en": "The client computes the end date from the clause; the model checks the claim against it.", "pl": "Datę końca najmu liczy klient z klauzuli; model sprawdza z nią twierdzenie."},
       "domain": "law",
